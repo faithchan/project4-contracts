@@ -30,4 +30,8 @@ describe("NFT", () => {
   describe("Transfers", async () => {
     it("transfers tokens", async () => {});
   });
+
+  describe("Burning", async () => {
+    it("burns tokens", async () => {});
+  });
 });

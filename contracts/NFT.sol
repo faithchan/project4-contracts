@@ -12,34 +12,46 @@ contract NFT is ERC721, Ownable {
     Counters.Counter private _tokenIds;
 
     /// @notice address of marketplace contract to set permissions
-    address private marketplace;
+    address private marketplaceAddress;
 
     /// @notice store tokenURIs for each tokenId
     mapping(uint256 => string) private _uris;
 
     /// @notice Mapping from token ID to the creator's address.
-    mapping(uint256 => address) private creators;
+    mapping(uint256 => address) private tokenCreators;
 
     /// @notice Mapping from token ID to the creator's address.
     mapping(address => uint256) private owners;
 
-    constructor(address marketplaceAddress) ERC721("Arkiv", "ARKV") {
-        marketplace = marketplaceAddress;
+    constructor(address _marketplaceAddress) ERC721("Arkiv", "ARKV") {
+        marketplaceAddress = _marketplaceAddress;
     }
 
     // ------------------ Mutative Functions ---------------------- //
 
     function mint(string memory tokenURI) public returns (uint256 _tokenId) {
-        // require(to != address(0));
         _tokenIds.increment();
         uint256 currentTokenId = _tokenIds.current();
-        _uris[currentTokenId] = tokenURI;
+        setTokenURI(currentTokenId, tokenURI);
         _safeMint(msg.sender, currentTokenId);
         return _tokenId;
     }
 
+    function setTokenURI(uint256 _tokenId, string memory newURI) public {
+        require(bytes(_uris[_tokenId]).length == 0, "Cannot set URI twice.");
+        _uris[_tokenId] = newURI;
+    }
+
     function burn(uint256 tokenId) public onlyTokenOwner(tokenId) {
         _burn(tokenId);
+    }
+
+    function safeTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public {
+        _safeTransfer(from, to, tokenId, "");
     }
 
     // ----------------------- Read Functions --------------------------- //
@@ -48,10 +60,38 @@ contract NFT is ERC721, Ownable {
         return (_uris[_tokenId]);
     }
 
+    /**
+     * @dev Gets the creator of the token.
+     * @param _tokenId uint256 ID of the token.
+     * @return address of the creator.
+     */
+    function tokenCreator(uint256 _tokenId) public view returns (address) {
+        return tokenCreators[_tokenId];
+    }
+
+    function getMarketAddress() public view returns (address marketAddress) {
+        return marketplaceAddress;
+    }
+
     // ----------------------- Modifiers --------------------------- //
+
+    /**
+     * @dev Checks that the token is owned by the sender.
+     * @param _tokenId uint256 ID of the token.
+     */
     modifier onlyTokenOwner(uint256 _tokenId) {
         address owner = ownerOf(_tokenId);
         require(owner == msg.sender, "must be the owner of the token");
+        _;
+    }
+
+    /**
+     * @dev Checks that the token was created by the sender.
+     * @param _tokenId uint256 ID of the token.
+     */
+    modifier onlyTokenCreator(uint256 _tokenId) {
+        address creator = tokenCreator(_tokenId);
+        require(creator == msg.sender, "must be the creator of the token");
         _;
     }
 }
