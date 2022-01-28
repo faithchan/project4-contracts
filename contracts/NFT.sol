@@ -11,25 +11,26 @@ contract NFT is ERC721, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
+    /// @notice address of marketplace contract to set permissions
+    address private marketplace;
+
     /// @notice store tokenURIs for each tokenId
     mapping(uint256 => string) private _uris;
 
-    /// @notice address of marketplace contract to set permissions
-    address private marketplaceAddress;
+    /// @notice Mapping from token ID to the creator's address.
+    mapping(uint256 => address) private creators;
 
-    constructor(address marketplace) ERC721("Gallery Token", "GTKN") {
-        marketplaceAddress = marketplace;
+    /// @notice Mapping from token ID to the creator's address.
+    mapping(address => uint256) private owners;
+
+    constructor(address marketplaceAddress) ERC721("Arkiv", "ARKV") {
+        marketplace = marketplaceAddress;
     }
 
-    /**
-        @notice Mints ERC721 tokens to the caller's wallet. 
-        @param tokenURI metadata of the NFT to be minted 
-        @return _tokenId of the NFT minted 
-    */
-    function mintToken(string memory tokenURI)
-        public
-        returns (uint256 _tokenId)
-    {
+    // ------------------ Mutative Functions ---------------------- //
+
+    function mint(string memory tokenURI) public returns (uint256 _tokenId) {
+        // require(to != address(0));
         _tokenIds.increment();
         uint256 currentTokenId = _tokenIds.current();
         _uris[currentTokenId] = tokenURI;
@@ -37,12 +38,20 @@ contract NFT is ERC721, Ownable {
         return _tokenId;
     }
 
-    /**
-        @notice retrieves the tokenURI corresponding to each tokenId 
-        @param _tokenId id number of the requested token
-        @return URI of the token 
-    */
+    function burn(uint256 tokenId) public onlyTokenOwner(tokenId) {
+        _burn(tokenId);
+    }
+
+    // ----------------------- Read Functions --------------------------- //
+
     function getTokenURI(uint256 _tokenId) public view returns (string memory) {
         return (_uris[_tokenId]);
+    }
+
+    // ----------------------- Modifiers --------------------------- //
+    modifier onlyTokenOwner(uint256 _tokenId) {
+        address owner = ownerOf(_tokenId);
+        require(owner == msg.sender, "must be the owner of the token");
+        _;
     }
 }
