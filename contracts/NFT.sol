@@ -7,6 +7,9 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "hardhat/console.sol";
 
 contract NFT is ERC721, Ownable {
+    // Event indicating metadata was updated.
+    event TokenURIUpdated(uint256 indexed _tokenId, string _uri);
+
     /// @notice _tokenIds to keep track of the number of NFTs minted
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
@@ -37,13 +40,8 @@ contract NFT is ERC721, Ownable {
         return _tokenId;
     }
 
-    function setTokenURI(uint256 _tokenId, string memory newURI) public {
-        require(bytes(_uris[_tokenId]).length == 0, "Cannot set URI twice.");
-        _uris[_tokenId] = newURI;
-    }
-
-    function burn(uint256 tokenId) public onlyTokenOwner(tokenId) {
-        _burn(tokenId);
+    function burn(uint256 _tokenId) public onlyTokenOwner(_tokenId) {
+        _burn(_tokenId);
     }
 
     function safeTransfer(
@@ -52,6 +50,26 @@ contract NFT is ERC721, Ownable {
         uint256 tokenId
     ) public {
         _safeTransfer(from, to, tokenId, "");
+    }
+
+    /**
+     * @dev Updates the token metadata if the owner is also the
+     *      creator.
+     * @param _tokenId uint256 ID of the token.
+     * @param _uri string metadata URI.
+     */
+    function updateTokenMetadata(uint256 _tokenId, string memory _uri)
+        public
+        onlyTokenOwner(_tokenId)
+        onlyTokenCreator(_tokenId)
+    {
+        setTokenURI(_tokenId, _uri);
+        emit TokenURIUpdated(_tokenId, _uri);
+    }
+
+    function setTokenURI(uint256 _tokenId, string memory newURI) public {
+        require(bytes(_uris[_tokenId]).length == 0, "Cannot set URI twice.");
+        _uris[_tokenId] = newURI;
     }
 
     // ----------------------- Read Functions --------------------------- //
