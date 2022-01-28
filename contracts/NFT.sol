@@ -14,7 +14,12 @@ contract NFT is ERC721, Ownable {
     /// @notice store tokenURIs for each tokenId
     mapping(uint256 => string) private _uris;
 
-    constructor() ERC721("Gallery Token", "GTKN") {}
+    /// @notice address of marketplace contract to set permissions
+    address private marketplaceAddress;
+
+    constructor(address marketplace) ERC721("Gallery Token", "GTKN") {
+        marketplaceAddress = marketplace;
+    }
 
     /**
         @notice Mints ERC721 tokens to the caller's wallet. 
