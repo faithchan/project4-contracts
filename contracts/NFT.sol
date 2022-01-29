@@ -99,7 +99,7 @@ contract NFT is ERC721, Ownable {
    */
   modifier onlyTokenOwner(uint256 _tokenId) {
     address owner = ownerOf(_tokenId);
-    require(owner == msg.sender, 'must be the owner of the token');
+    require(owner == msg.sender, 'Caller is not the owner of the token');
     _;
   }
 
@@ -109,7 +109,7 @@ contract NFT is ERC721, Ownable {
    */
   modifier onlyTokenCreator(uint256 _tokenId) {
     address creator = tokenCreator(_tokenId);
-    require(creator == msg.sender, 'must be the creator of the token');
+    require(creator == msg.sender, 'Caller is not the creator of the token');
     _;
   }
 }

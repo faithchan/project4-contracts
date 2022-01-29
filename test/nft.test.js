@@ -89,10 +89,23 @@ describe('NFT', () => {
     })
   })
 
-  // describe('Burning', async () => {
-  //   it('allows token owner to burn tokens', async () => {})
-  //   it('reverts if caller is not token owner', async () => {})
-  // })
+  describe('Burning', async () => {
+    let tokenId
+    beforeEach(async () => {
+      const token = await nft.mint(minter.address, token1URI)
+      const txn = await token.wait()
+      tokenId = txn.events[0].args.tokenId
+    })
+
+    it('only allows token owner to burn tokens', async () => {
+      await nft.connect(minter).burn(tokenId)
+      expect(await nft.balanceOf(minter.address)).to.equal(0)
+    })
+
+    it('reverts if caller is not token owner', async () => {
+      await expectRevert(nft.burn(tokenId), 'Caller is not the owner of the token')
+    })
+  })
 
   // describe('Updating token URI', async () => {
   //   it('allows creator to update URI if they are also the owner', async () => {})
