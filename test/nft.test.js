@@ -1,37 +1,44 @@
-const { expect } = require("chai");
-const { ethers } = require("hardhat");
+const { expect } = require('chai')
+const { ethers } = require('hardhat')
 
-describe("NFT", () => {
+describe('NFT', () => {
+  let marketplace
+  let nft
+
   beforeEach(async () => {
-    [owner, minter, receiver] = await ethers.getSigners();
-    const NFT = await ethers.getContractFactory("NFT");
-    nft = await NFT.deploy();
-    await nft.deployed();
-  });
+    ;[contractOwner, minter, receiver] = await ethers.getSigners()
+    const Marketplace = await hre.ethers.getContractFactory('Marketplace')
+    marketplace = await Marketplace.deploy()
+    await marketplace.deployed()
 
-  describe("Deployment", async () => {
-    it("has a name", async () => {
-      expect(await nft.name()).to.equal("Gallery Token");
-    });
+    const NFT = await ethers.getContractFactory('NFT')
+    nft = await NFT.deploy(marketplace.address)
+    await nft.deployed()
+  })
 
-    it("has a symbol", async () => {
-      expect(await nft.symbol()).to.equal("GTKN");
-    });
+  describe('Deployment', async () => {
+    it('has a name', async () => {
+      expect(await nft.name()).to.equal('Arkiv')
+    })
 
-    it("sets the owner as contract deployer", async () => {
-      expect(await nft.owner()).to.equal(owner.address);
-    });
-  });
+    it('has a symbol', async () => {
+      expect(await nft.symbol()).to.equal('ARKV')
+    })
 
-  describe("Minting", async () => {
-    it("mints tokens to msg sender", async () => {});
-  });
+    it('sets the owner as contract deployer', async () => {
+      expect(await nft.owner()).to.equal(contractOwner.address)
+    })
+  })
 
-  describe("Transfers", async () => {
-    it("transfers tokens", async () => {});
-  });
+  describe('Minting', async () => {
+    it('mints tokens to msg sender', async () => {})
+  })
 
-  describe("Burning", async () => {
-    it("burns tokens", async () => {});
-  });
-});
+  describe('Transfers', async () => {
+    it('transfers tokens', async () => {})
+  })
+
+  describe('Burning', async () => {
+    it('burns tokens', async () => {})
+  })
+})
