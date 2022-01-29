@@ -38,7 +38,7 @@ describe('NFT', () => {
     let tokenId
 
     beforeEach(async () => {
-      const token = await nft.mint(minter.address, token1URI)
+      const token = await nft.connect(minter).mint(minter.address, token1URI)
       const txn = await token.wait()
       tokenId = txn.events[0].args.tokenId
     })
@@ -49,6 +49,10 @@ describe('NFT', () => {
 
     it('sets owner of token as minter', async () => {
       expect(await nft.ownerOf(tokenId)).to.equal(minter.address)
+    })
+
+    it('sets creator of token as creator', async () => {
+      expect(await nft.tokenCreator(tokenId)).to.equal(minter.address)
     })
 
     it('sets tokenURI upon minting', async () => {

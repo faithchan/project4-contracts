@@ -36,6 +36,7 @@ contract NFT is ERC721, Ownable {
     uint256 currentTokenId = _tokenIds.current();
     setTokenURI(currentTokenId, tokenURI);
     _safeMint(to, currentTokenId);
+    tokenCreators[currentTokenId] = msg.sender;
     _tokenIds.increment();
     return _tokenId;
   }
