@@ -124,18 +124,15 @@ describe('NFT', () => {
       expect(await nft.getTokenURI(tokenId)).to.equal(token2URI)
     })
 
+    it('emits a TokenURIUpdated event', async () => {
+      await expect(nft.connect(minter).updateTokenMetadata(tokenId, token2URI))
+        .to.emit(nft, 'TokenURIUpdated')
+        .withArgs(tokenId, token2URI)
+    })
+
     it('reverts if caller is not owner', async () => {})
 
     it('reverts if caller is not creator', async () => {})
-
-    it('emits a TokenURIUpdated event', async () => {
-      // const receipt = await nft.connect(minter).updateTokenMetadata(tokenId, token2URI)
-      // const txn = await receipt.wait()
-      // console.log('txn: ', txn)
-      //   await expect(nft.connect(minter).updateTokenMetadata(tokenId, token2URI))
-      //     .to.emit('TokenURIUpdated')
-      //     .withArgs(tokenId, token2URI)
-    })
   })
 
   // describe('Royalties', async () => {
