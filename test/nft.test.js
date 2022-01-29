@@ -111,13 +111,38 @@ describe('NFT', () => {
     })
   })
 
-  // describe('Updating token URI', async () => {
-  //   it('allows creator to update URI if they are also the owner', async () => {})
-  //   it('reverts if caller is not owner', async () => {})
-  //   it('reverts if caller is not creator', async () => {})
-  // })
+  describe('Updating token URI', async () => {
+    let tokenId
+    beforeEach(async () => {
+      const token = await nft.connect(minter).mint(minter.address, token1URI)
+      const txn = await token.wait()
+      tokenId = txn.events[0].args.tokenId
+    })
+
+    it('allows creator to update URI if they are also the owner', async () => {
+      await nft.connect(minter).updateTokenMetadata(tokenId, token2URI)
+      expect(await nft.getTokenURI(tokenId)).to.equal(token2URI)
+    })
+
+    it('reverts if caller is not owner', async () => {})
+
+    it('reverts if caller is not creator', async () => {})
+
+    it('emits a TokenURIUpdated event', async () => {
+      // const receipt = await nft.connect(minter).updateTokenMetadata(tokenId, token2URI)
+      // const txn = await receipt.wait()
+      // console.log('txn: ', txn)
+      //   await expect(nft.connect(minter).updateTokenMetadata(tokenId, token2URI))
+      //     .to.emit('TokenURIUpdated')
+      //     .withArgs(tokenId, token2URI)
+    })
+  })
 
   // describe('Royalties', async () => {
   //   it('sets royalty for specific token upon mint', async () => {})
   // })
 })
+
+// await expect(token.transfer(walletTo.address, 7))
+//   .to.emit(token, 'Transfer')
+//   .withArgs(wallet.address, walletTo.address, 7)

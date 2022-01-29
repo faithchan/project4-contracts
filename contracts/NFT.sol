@@ -61,7 +61,6 @@ contract NFT is ERC721, Ownable {
   }
 
   function setTokenURI(uint256 _tokenId, string memory newURI) internal {
-    require(bytes(_uris[_tokenId]).length == 0, 'Cannot set URI twice.');
     _uris[_tokenId] = newURI;
   }
 
