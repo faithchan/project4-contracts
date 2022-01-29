@@ -33,10 +33,10 @@ contract NFT is ERC721, Ownable {
   // ------------------ Mutative Functions ---------------------- //
 
   function mint(string memory tokenURI) public returns (uint256 _tokenId) {
-    _tokenIds.increment();
     uint256 currentTokenId = _tokenIds.current();
     setTokenURI(currentTokenId, tokenURI);
     _safeMint(msg.sender, currentTokenId);
+    _tokenIds.increment();
     return _tokenId;
   }
 

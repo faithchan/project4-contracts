@@ -4,6 +4,8 @@ const { ethers } = require('hardhat')
 describe('NFT', () => {
   let marketplace
   let nft
+  const token1URI = 'https://ipfs.io/ipfs/QmXmNSH2dyp5R6dkW5MVhNc7xqV9v3NHWxNXJfCL6CcYxS'
+  const token2URI = 'https://ipfs.io/ipfs/QmQ35DkX8HHjhkJe5MsMAd4X51iP3MHV5d5dZoee32J83k'
 
   beforeEach(async () => {
     ;[contractOwner, minter, receiver] = await ethers.getSigners()
@@ -31,7 +33,26 @@ describe('NFT', () => {
   })
 
   describe('Minting', async () => {
-    it('mints tokens to msg sender', async () => {})
+    let tokenId
+    beforeEach(async () => {
+      const token = await nft.connect(minter).mint(token1URI)
+      const txn = await token.wait()
+      tokenId = txn.events[0].args.tokenId
+    })
+
+    it('mints tokens to msg sender', async () => {
+      expect(await nft.balanceOf(minter.address)).to.equal(1)
+    })
+
+    it('sets owner of token as minter', async () => {
+      expect(await nft.ownerOf(tokenId)).to.equal(minter.address)
+    })
+
+    it('sets tokenURI upon minting', async () => {
+      expect(await nft.getTokenURI(tokenId)).to.equal(token1URI)
+    })
+
+    it('reverts on mint to zero address', async () => {})
   })
 
   describe('Transfers', async () => {
@@ -39,6 +60,14 @@ describe('NFT', () => {
   })
 
   describe('Burning', async () => {
+    it('burns tokens', async () => {})
+  })
+
+  describe('Updating token URI', async () => {
+    it('burns tokens', async () => {})
+  })
+
+  describe('Royalties', async () => {
     it('burns tokens', async () => {})
   })
 })
