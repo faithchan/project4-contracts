@@ -1,3 +1,5 @@
+const { BN, constants, expectEvent, expectRevert } = require('@openzeppelin/test-helpers')
+const { ZERO_ADDRESS } = constants
 const { expect } = require('chai')
 const { ethers } = require('hardhat')
 
@@ -35,7 +37,7 @@ describe('NFT', () => {
   describe('Minting', async () => {
     let tokenId
     beforeEach(async () => {
-      const token = await nft.connect(minter).mint(token1URI)
+      const token = await nft.mint(minter.address, token1URI)
       const txn = await token.wait()
       tokenId = txn.events[0].args.tokenId
     })
@@ -52,7 +54,9 @@ describe('NFT', () => {
       expect(await nft.getTokenURI(tokenId)).to.equal(token1URI)
     })
 
-    it('reverts on mint to zero address', async () => {})
+    it('reverts on mint to zero address', async () => {
+      await expectRevert(nft.mint(ZERO_ADDRESS, token1URI), 'ERC721: mint to the zero address')
+    })
   })
 
   describe('Transfers', async () => {
