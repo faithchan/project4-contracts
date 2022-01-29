@@ -10,7 +10,7 @@ describe('NFT', () => {
   const token2URI = 'https://ipfs.io/ipfs/QmQ35DkX8HHjhkJe5MsMAd4X51iP3MHV5d5dZoee32J83k'
 
   beforeEach(async () => {
-    ;[contractOwner, minter, receiver] = await ethers.getSigners()
+    ;[contractOwner, minter, receiver, operator] = await ethers.getSigners()
     const Marketplace = await hre.ethers.getContractFactory('Marketplace')
     marketplace = await Marketplace.deploy()
     await marketplace.deployed()
@@ -68,13 +68,25 @@ describe('NFT', () => {
       tokenId = txn.events[0].args.tokenId
     })
 
-    it('transfers tokens using transferFrom', async () => {
-      await nft.connect(minter).approve(contractOwner.address, tokenId)
-      await nft.transferToken(minter.address, receiver.address, 0)
+    it('allows owner to transfer tokens using transferFrom', async () => {
+      await nft.connect(minter).transferToken(minter.address, receiver.address, tokenId)
+      expect(await nft.balanceOf(minter.address)).to.equal(0)
+      expect(await nft.balanceOf(receiver.address)).to.equal(1)
     })
 
-    it('reverts if caller is not owner ', async () => {})
-    it('reverts if caller is not an approved operator ', async () => {})
+    it('allows approved operator to transfer tokens using transferFrom', async () => {
+      await nft.connect(minter).approve(operator.address, tokenId)
+      await nft.connect(operator).transferToken(minter.address, receiver.address, tokenId)
+      expect(await nft.balanceOf(minter.address)).to.equal(0)
+      expect(await nft.balanceOf(receiver.address)).to.equal(1)
+    })
+
+    it('reverts if caller is not owner or approved operator ', async () => {
+      await expectRevert(
+        nft.transferToken(minter.address, receiver.address, tokenId),
+        'ERC721: transfer caller is not owner nor approved'
+      )
+    })
   })
 
   // describe('Burning', async () => {
