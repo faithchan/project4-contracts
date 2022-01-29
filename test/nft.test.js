@@ -130,9 +130,17 @@ describe('NFT', () => {
         .withArgs(tokenId, token2URI)
     })
 
-    it('reverts if caller is not owner', async () => {})
+    it('reverts if caller is not owner', async () => {
+      await expectRevert(nft.updateTokenMetadata(tokenId, token2URI), 'Caller is not the owner of the token')
+    })
 
-    it('reverts if caller is not creator', async () => {})
+    it('reverts if caller is not creator', async () => {
+      await nft.connect(minter).transferToken(minter.address, receiver.address, tokenId)
+      await expectRevert(
+        nft.connect(receiver).updateTokenMetadata(tokenId, token2URI),
+        'Caller is not the creator of the token'
+      )
+    })
   })
 
   // describe('Royalties', async () => {
