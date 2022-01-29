@@ -44,14 +44,6 @@ contract NFT is ERC721, Ownable {
     _burn(_tokenId);
   }
 
-  function safeTransfer(
-    address from,
-    address to,
-    uint256 tokenId
-  ) public {
-    _safeTransfer(from, to, tokenId, '');
-  }
-
   /**
    * @dev Updates the token metadata if the owner is also the
    *      creator.
@@ -70,6 +62,14 @@ contract NFT is ERC721, Ownable {
   function setTokenURI(uint256 _tokenId, string memory newURI) internal {
     require(bytes(_uris[_tokenId]).length == 0, 'Cannot set URI twice.');
     _uris[_tokenId] = newURI;
+  }
+
+  function transferToken(
+    address from,
+    address to,
+    uint256 tokenId
+  ) public {
+    transferFrom(from, to, tokenId);
   }
 
   // ----------------------- Read Functions --------------------------- //

@@ -36,6 +36,7 @@ describe('NFT', () => {
 
   describe('Minting', async () => {
     let tokenId
+
     beforeEach(async () => {
       const token = await nft.mint(minter.address, token1URI)
       const txn = await token.wait()
@@ -60,18 +61,34 @@ describe('NFT', () => {
   })
 
   describe('Transfers', async () => {
-    it('transfers tokens', async () => {})
+    let tokenId
+    beforeEach(async () => {
+      const token = await nft.mint(minter.address, token1URI)
+      const txn = await token.wait()
+      tokenId = txn.events[0].args.tokenId
+    })
+
+    it('transfers tokens using transferFrom', async () => {
+      await nft.connect(minter).approve(contractOwner.address, tokenId)
+      await nft.transferToken(minter.address, receiver.address, 0)
+    })
+
+    it('reverts if caller is not owner ', async () => {})
+    it('reverts if caller is not an approved operator ', async () => {})
   })
 
-  describe('Burning', async () => {
-    it('burns tokens', async () => {})
-  })
+  // describe('Burning', async () => {
+  //   it('allows token owner to burn tokens', async () => {})
+  //   it('reverts if caller is not token owner', async () => {})
+  // })
 
-  describe('Updating token URI', async () => {
-    it('burns tokens', async () => {})
-  })
+  // describe('Updating token URI', async () => {
+  //   it('allows creator to update URI if they are also the owner', async () => {})
+  //   it('reverts if caller is not owner', async () => {})
+  //   it('reverts if caller is not creator', async () => {})
+  // })
 
-  describe('Royalties', async () => {
-    it('burns tokens', async () => {})
-  })
+  // describe('Royalties', async () => {
+  //   it('sets royalty for specific token upon mint', async () => {})
+  // })
 })
