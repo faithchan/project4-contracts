@@ -156,6 +156,12 @@ describe('NFT', () => {
       tokenId = txn.events[0].args.tokenId
     })
 
-    it('sets royalty for specific token upon mint', async () => {})
+    it('sets royalty for specific token upon mint', async () => {
+      const txn = await nft.royaltyInfo(tokenId, salePrice)
+      expect(txn.receiver).to.equal(minter.address)
+      expect(txn.royaltyAmount).to.equal((royaltyAmount * salePrice) / 10000)
+    })
+
+    it('updates token royalties', async () => {})
   })
 })
