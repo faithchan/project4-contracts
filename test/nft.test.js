@@ -7,6 +7,7 @@ describe('NFT', () => {
   let marketplace
   let nft
   let royaltyAmount = 600
+  let newRoyaltyAmount = 700
   let salePrice = 100
   const token1URI = 'https://ipfs.io/ipfs/QmXmNSH2dyp5R6dkW5MVhNc7xqV9v3NHWxNXJfCL6CcYxS'
   const token2URI = 'https://ipfs.io/ipfs/QmQ35DkX8HHjhkJe5MsMAd4X51iP3MHV5d5dZoee32J83k'
@@ -112,7 +113,7 @@ describe('NFT', () => {
     })
 
     it('reverts if caller is not token owner', async () => {
-      await expectRevert(nft.burn(tokenId), 'Caller is not the owner of the token')
+      await expectRevert(nft.burn(tokenId), 'Caller is not the owner')
     })
   })
 
@@ -136,15 +137,12 @@ describe('NFT', () => {
     })
 
     it('reverts if caller is not owner', async () => {
-      await expectRevert(nft.updateTokenMetadata(tokenId, token2URI), 'Caller is not the owner of the token')
+      await expectRevert(nft.updateTokenMetadata(tokenId, token2URI), 'Caller is not the owner')
     })
 
     it('reverts if caller is not creator', async () => {
       await nft.connect(minter).transferToken(minter.address, receiver.address, tokenId)
-      await expectRevert(
-        nft.connect(receiver).updateTokenMetadata(tokenId, token2URI),
-        'Caller is not the creator of the token'
-      )
+      await expectRevert(nft.connect(receiver).updateTokenMetadata(tokenId, token2URI), 'Caller is not the creator')
     })
   })
 
@@ -162,8 +160,18 @@ describe('NFT', () => {
       expect(txn.royaltyAmount).to.equal((royaltyAmount * salePrice) / 10000)
     })
 
-    it('updates token royalties', async () => {})
-    it('reverts if royalty amount is >10000', async () => {})
-    it('reverts if receiver is a null address', async () => {})
+    it('allows creator to update token royalties', async () => {
+      await nft.connect(minter).updateTokenRoyalty(tokenId, newRoyaltyAmount)
+      const info = await nft.royaltyInfo(tokenId, salePrice)
+      expect(info.royaltyAmount).to.equal((newRoyaltyAmount * salePrice) / 10000)
+    })
+
+    it('reverts if anyone other than the creator tries to change token royalties', async () => {
+      await expectRevert(nft.updateTokenRoyalty(tokenId, newRoyaltyAmount), 'Caller is not the creator')
+    })
+
+    it('reverts if royalty amount is >10000', async () => {
+      await expectRevert(nft.connect(minter).updateTokenRoyalty(tokenId, 10001), 'ERC2981Royalties: Too high')
+    })
   })
 })
