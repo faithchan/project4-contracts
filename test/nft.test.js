@@ -6,6 +6,8 @@ const { ethers } = require('hardhat')
 describe('NFT', () => {
   let marketplace
   let nft
+  let royaltyAmount = 600
+  let salePrice = 100
   const token1URI = 'https://ipfs.io/ipfs/QmXmNSH2dyp5R6dkW5MVhNc7xqV9v3NHWxNXJfCL6CcYxS'
   const token2URI = 'https://ipfs.io/ipfs/QmQ35DkX8HHjhkJe5MsMAd4X51iP3MHV5d5dZoee32J83k'
 
@@ -147,7 +149,3 @@ describe('NFT', () => {
   //   it('sets royalty for specific token upon mint', async () => {})
   // })
 })
-
-// await expect(token.transfer(walletTo.address, 7))
-//   .to.emit(token, 'Transfer')
-//   .withArgs(wallet.address, walletTo.address, 7)

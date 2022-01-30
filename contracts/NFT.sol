@@ -4,9 +4,10 @@ pragma solidity ^0.8.0;
 import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/utils/Counters.sol';
+import './royalties/ERC2981.sol';
 import 'hardhat/console.sol';
 
-contract NFT is ERC721, Ownable {
+contract NFT is ERC721, Ownable, ERC2981 {
   // Event indicating metadata was updated.
   event TokenURIUpdated(uint256 indexed _tokenId, string _uri);
 
@@ -17,26 +18,45 @@ contract NFT is ERC721, Ownable {
   /// @notice address of marketplace contract to set permissions
   address private marketplaceAddress;
 
-  /// @notice store tokenURIs for each tokenId
+  /// @notice maps tokenIds to respective tokenURIs
   mapping(uint256 => string) private _uris;
 
-  /// @notice Mapping from token ID to the creator's address.
+  /// @notice Maps tokenId to the creator's address
   mapping(uint256 => address) private tokenCreators;
 
-  /// @notice Mapping from token ID to the creator's address.
+  /// @notice Maps tokenId to the owner's address
   mapping(address => uint256) private owners;
+
+  /// @notice Maps tokenId to royalty information
+  mapping(uint256 => RoyaltyInfo) internal _royalties;
 
   constructor(address _marketplaceAddress) ERC721('Arkiv', 'ARKV') {
     marketplaceAddress = _marketplaceAddress;
   }
 
+  /// @inheritdoc	ERC165
+  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, ERC2981) returns (bool) {
+    return super.supportsInterface(interfaceId);
+  }
+
   // ------------------ Mutative Functions ---------------------- //
 
-  function mint(address to, string memory tokenURI) public returns (uint256 _tokenId) {
+  function mint(
+    address to,
+    string memory tokenURI,
+    address royaltyRecipient,
+    uint256 royaltyValue
+  ) public returns (uint256 _tokenId) {
     uint256 currentTokenId = _tokenIds.current();
-    setTokenURI(currentTokenId, tokenURI);
+
     _safeMint(to, currentTokenId);
+    setTokenURI(currentTokenId, tokenURI);
     tokenCreators[currentTokenId] = msg.sender;
+
+    if (royaltyValue > 0) {
+      _setTokenRoyalty(currentTokenId, royaltyRecipient, royaltyValue);
+    }
+
     _tokenIds.increment();
     return _tokenId;
   }
@@ -70,6 +90,19 @@ contract NFT is ERC721, Ownable {
     uint256 tokenId
   ) public {
     transferFrom(from, to, tokenId);
+  }
+
+  /// @dev Sets token royalties
+  /// @param tokenId the token id fir which we register the royalties
+  /// @param recipient recipient of the royalties
+  /// @param value percentage (using 2 decimals - 10000 = 100, 0 = 0)
+  function _setTokenRoyalty(
+    uint256 tokenId,
+    address recipient,
+    uint256 value
+  ) internal {
+    require(value <= 10000, 'ERC2981Royalties: Too high');
+    _royalties[tokenId] = RoyaltyInfo(recipient, uint24(value));
   }
 
   // ----------------------- Read Functions --------------------------- //
