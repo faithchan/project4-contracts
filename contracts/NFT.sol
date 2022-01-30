@@ -5,9 +5,10 @@ import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/utils/Counters.sol';
 import './ERC2981.sol';
+import './Whitelist.sol';
 import 'hardhat/console.sol';
 
-contract NFT is ERC721, Ownable, ERC2981 {
+contract NFT is ERC721, Ownable, ERC2981, Whitelist {
   // Event indicating metadata was updated.
   event TokenURIUpdated(uint256 indexed _tokenId, string _uri);
 
@@ -41,12 +42,27 @@ contract NFT is ERC721, Ownable, ERC2981 {
 
   // ------------------ Mutative Functions ---------------------- //
 
+  /**
+   * @dev Whitelists a bunch of addresses.
+   * @param _whitelistees address[] of addresses to whitelist.
+   */
+  function initWhitelist(address[] memory _whitelistees) public onlyOwner {
+    for (uint256 i = 0; i < _whitelistees.length; i++) {
+      address creator = _whitelistees[i];
+      if (!isWhitelisted(creator)) {
+        _whitelist(creator);
+      }
+    }
+  }
+
   function mint(
     address to,
     string memory tokenURI,
     address royaltyRecipient,
     uint256 royaltyValue
   ) public returns (uint256 _tokenId) {
+    require(isWhitelisted(msg.sender), 'must be whitelisted to create tokens');
+
     uint256 currentTokenId = _tokenIds.current();
 
     _safeMint(to, currentTokenId);
