@@ -2,11 +2,19 @@ const { expect } = require('chai')
 const { ethers } = require('hardhat')
 
 describe('Marketplace', () => {
+  let marketplace
+  let nft
+  let marketplaceRoyalty = 500
+
   beforeEach(async () => {
     ;[contractOwner, minter, receiver] = await ethers.getSigners()
     const Marketplace = await ethers.getContractFactory('Marketplace')
-    marketplace = await Marketplace.deploy()
+    marketplace = await Marketplace.deploy(marketplaceRoyalty)
     await marketplace.deployed()
+
+    const NFT = await ethers.getContractFactory('NFT')
+    nft = await NFT.deploy(marketplace.address)
+    await nft.deployed()
   })
 
   // describe('Deployment', async () => {
