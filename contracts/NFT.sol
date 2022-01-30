@@ -61,7 +61,7 @@ contract NFT is ERC721, Ownable, ERC2981, Whitelist {
     address royaltyRecipient,
     uint256 royaltyValue
   ) public returns (uint256 _tokenId) {
-    require(isWhitelisted(msg.sender), 'must be whitelisted to create tokens');
+    require(isWhitelisted(msg.sender), 'Must be whitelisted to create tokens');
 
     uint256 currentTokenId = _tokenIds.current();
 

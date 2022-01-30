@@ -41,6 +41,7 @@ describe('NFT', () => {
     let tokenId
 
     beforeEach(async () => {
+      await nft.addToWhitelist(minter.address)
       const token = await nft.connect(minter).mint(minter.address, token1URI, minter.address, royaltyAmount)
       const txn = await token.wait()
       tokenId = txn.events[0].args.tokenId
@@ -63,6 +64,7 @@ describe('NFT', () => {
     })
 
     it('reverts on mint to null address', async () => {
+      await nft.addToWhitelist(contractOwner.address)
       await expectRevert(
         nft.mint(ZERO_ADDRESS, token1URI, ZERO_ADDRESS, royaltyAmount),
         'ERC721: mint to the zero address'
@@ -73,6 +75,7 @@ describe('NFT', () => {
   describe('Transfers', async () => {
     let tokenId
     beforeEach(async () => {
+      await nft.addToWhitelist(contractOwner.address)
       const token = await nft.mint(minter.address, token1URI, minter.address, royaltyAmount)
       const txn = await token.wait()
       tokenId = txn.events[0].args.tokenId
@@ -102,6 +105,7 @@ describe('NFT', () => {
   describe('Burning', async () => {
     let tokenId
     beforeEach(async () => {
+      await nft.addToWhitelist(contractOwner.address)
       const token = await nft.mint(minter.address, token1URI, minter.address, royaltyAmount)
       const txn = await token.wait()
       tokenId = txn.events[0].args.tokenId
@@ -120,6 +124,7 @@ describe('NFT', () => {
   describe('Updating token URI', async () => {
     let tokenId
     beforeEach(async () => {
+      await nft.addToWhitelist(minter.address)
       const token = await nft.connect(minter).mint(minter.address, token1URI, minter.address, royaltyAmount)
       const txn = await token.wait()
       tokenId = txn.events[0].args.tokenId
@@ -149,6 +154,7 @@ describe('NFT', () => {
   describe('Royalties', async () => {
     let tokenId
     beforeEach(async () => {
+      await nft.addToWhitelist(minter.address)
       const token = await nft.connect(minter).mint(minter.address, token1URI, minter.address, royaltyAmount)
       const txn = await token.wait()
       tokenId = txn.events[0].args.tokenId
