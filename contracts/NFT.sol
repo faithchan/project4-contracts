@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/utils/Counters.sol';
-import './royalties/ERC2981.sol';
+import './ERC2981.sol';
 import 'hardhat/console.sol';
 
 contract NFT is ERC721, Ownable, ERC2981 {
