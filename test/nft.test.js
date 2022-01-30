@@ -148,7 +148,14 @@ describe('NFT', () => {
     })
   })
 
-  // describe('Royalties', async () => {
-  //   it('sets royalty for specific token upon mint', async () => {})
-  // })
+  describe('Royalties', async () => {
+    let tokenId
+    beforeEach(async () => {
+      const token = await nft.connect(minter).mint(minter.address, token1URI, minter.address, royaltyAmount)
+      const txn = await token.wait()
+      tokenId = txn.events[0].args.tokenId
+    })
+
+    it('sets royalty for specific token upon mint', async () => {})
+  })
 })
