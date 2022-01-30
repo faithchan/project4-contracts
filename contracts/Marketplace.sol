@@ -23,7 +23,7 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
   uint256 public royalties;
 
   /// @notice maps itemId to Item struct
-  mapping(uint256 => Item) private itemsMapping;
+  mapping(uint256 => Item) private MarketItems;
 
   /// @notice Item struct to track details of items listed on the marketplace
   struct Item {
@@ -57,7 +57,7 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
   }
 
   /**
-    @notice Executes listing of item by adding new items into the mapping 
+    @notice Executes listing of item by adding new items into the mapping. Requires holder to call setApprovalForAll before calling this function. 
     @dev Transfers the NFT from the owner's wallet to the marketplace. 
     @param nftAddress contract address of the NFT to be listed  
     @param _tokenId tokenId of the NFT to be listed
@@ -70,7 +70,7 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
   ) public {
     _itemIds.increment();
     uint256 itemId = _itemIds.current();
-    itemsMapping[itemId] = Item(
+    MarketItems[itemId] = Item(
       nftAddress,
       _tokenId,
       itemId,
@@ -85,33 +85,67 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
   }
 
   /**
-        @notice Allows buyer to purchase one or more NFTs 
-        @dev Transfers the desired quantity of tokens from the marketplace to the buyer 
-        @dev Transfer a portion of ether sent by the buyer to the marketplace as royalties. Remaining ether is transferred to the seller. 
-        @param nftAddress contract address of the NFT to be purchased
-        @param _itemId itemId of the NFT to be purchased 
+    @notice Allows buyer to purchase one or more NFTs 
+    @dev Transfers the desired quantity of tokens from the marketplace to the buyer 
+    @dev Transfer a portion of ether sent by the buyer to the marketplace as royalties. Remaining ether is transferred to the seller. 
+    @param nftAddress contract address of the NFT to be purchased
+    @param _itemId itemId of the NFT to be purchased 
     */
   function purchaseItem(address nftAddress, uint256 _itemId) public payable nonReentrant {
-    uint256 price = itemsMapping[_itemId].price;
-    uint256 _tokenId = itemsMapping[_itemId].tokenId;
-    bool isForSale = itemsMapping[_itemId].isListed;
-    address owner = itemsMapping[_itemId].owner;
+    uint256 price = MarketItems[_itemId].price;
+    uint256 _tokenId = MarketItems[_itemId].tokenId;
+    bool isForSale = MarketItems[_itemId].isListed;
+    address owner = MarketItems[_itemId].owner;
 
     require(isForSale == true, 'Item requested is not for sale.');
     require(msg.value == price, 'Please submit the correct amount of ether.');
+
+    // get RoyaltyInfo from nft contract
 
     uint256 royaltiesToMarketplace = ((royalties * msg.value) / 100);
     uint256 etherToSeller = msg.value - royaltiesToMarketplace;
 
     IERC721(nftAddress).transferFrom(owner, msg.sender, _tokenId);
 
-    itemsMapping[_itemId].owner = payable(msg.sender);
-    itemsMapping[_itemId].isListed = false;
+    MarketItems[_itemId].owner = payable(msg.sender);
+    MarketItems[_itemId].isListed = false;
 
     (bool royaltiesTransferred, ) = payable(marketplaceOwner).call{ value: royaltiesToMarketplace }('');
     require(royaltiesTransferred, 'Failed to transfer royalties to marketplace.');
 
-    (bool salePriceTransferred, ) = itemsMapping[_itemId].seller.call{ value: etherToSeller }('');
+    (bool salePriceTransferred, ) = MarketItems[_itemId].seller.call{ value: etherToSeller }('');
     require(salePriceTransferred, 'Failed to transfer sale price to seller.');
+  }
+
+  // ------------------ Read Functions ---------------------- //
+
+  function getListedItems() public view returns (Item[] memory) {
+    uint256 totalItemCount = _itemIds.current();
+    uint256 itemsListedCount = 0;
+    uint256 resultItemId = 0;
+
+    for (uint256 i = 0; i < totalItemCount; i++) {
+      if (MarketItems[i + 1].isListed == true) {
+        itemsListedCount++;
+      }
+    }
+
+    Item[] memory listedItems = new Item[](itemsListedCount);
+    for (uint256 i = 0; i < totalItemCount; i++) {
+      if (MarketItems[i + 1].isListed == true) {
+        uint256 thisItemId = MarketItems[i + 1].itemId;
+        Item storage thisItem = MarketItems[thisItemId];
+        listedItems[resultItemId] = thisItem;
+        resultItemId++;
+      }
+    }
+    return listedItems;
+  }
+
+  // ------------------ Modifiers ---------------------- //
+
+  modifier onlyItemOwner(uint256 id) {
+    require(MarketItems[id].owner == msg.sender, 'Only product owner can do this operation');
+    _;
   }
 }
