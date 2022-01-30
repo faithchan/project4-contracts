@@ -61,7 +61,7 @@ describe('NFT', () => {
       expect(await nft.getTokenURI(tokenId)).to.equal(token1URI)
     })
 
-    it('reverts on mint to zero address', async () => {
+    it('reverts on mint to null address', async () => {
       await expectRevert(
         nft.mint(ZERO_ADDRESS, token1URI, ZERO_ADDRESS, royaltyAmount),
         'ERC721: mint to the zero address'
@@ -163,5 +163,7 @@ describe('NFT', () => {
     })
 
     it('updates token royalties', async () => {})
+    it('reverts if royalty amount is >10000', async () => {})
+    it('reverts if receiver is a null address', async () => {})
   })
 })

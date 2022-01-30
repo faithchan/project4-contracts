@@ -51,11 +51,8 @@ contract NFT is ERC721, Ownable, ERC2981 {
 
     _safeMint(to, currentTokenId);
     setTokenURI(currentTokenId, tokenURI);
+    _setTokenRoyalty(currentTokenId, royaltyRecipient, royaltyValue);
     tokenCreators[currentTokenId] = msg.sender;
-
-    if (royaltyValue > 0) {
-      _setTokenRoyalty(currentTokenId, royaltyRecipient, royaltyValue);
-    }
 
     _tokenIds.increment();
     return _tokenId;
@@ -102,7 +99,17 @@ contract NFT is ERC721, Ownable, ERC2981 {
     uint256 value
   ) internal {
     require(value <= 10000, 'ERC2981Royalties: Too high');
+    require(value >= 0, 'ERC2981Royalties: Too low');
+
     _royalties[tokenId] = RoyaltyInfo(recipient, uint24(value));
+  }
+
+  function updateTokenRoyalty(uint256 _tokenId, uint256 royaltyValue)
+    public
+    onlyTokenOwner(_tokenId)
+    onlyTokenCreator(_tokenId)
+  {
+    _setTokenRoyalty(_tokenId, msg.sender, royaltyValue);
   }
 
   // ----------------------- Read Functions --------------------------- //
