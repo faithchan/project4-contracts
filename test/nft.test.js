@@ -13,7 +13,7 @@ describe('NFT', () => {
   const token2URI = 'https://ipfs.io/ipfs/QmQ35DkX8HHjhkJe5MsMAd4X51iP3MHV5d5dZoee32J83k'
 
   beforeEach(async () => {
-    ;[contractOwner, minter, receiver, operator] = await ethers.getSigners()
+    ;[contractOwner, minter, receiver, operator, whitelistAdd1, whitelistAdd2] = await ethers.getSigners()
     const Marketplace = await hre.ethers.getContractFactory('Marketplace')
     marketplace = await Marketplace.deploy()
     await marketplace.deployed()
@@ -179,5 +179,12 @@ describe('NFT', () => {
     it('reverts if royalty amount is >10000', async () => {
       await expectRevert(nft.connect(minter).updateTokenRoyalty(tokenId, 10001), 'ERC2981Royalties: Too high')
     })
+  })
+
+  describe('Whitelisting', async () => {
+    it('allows contract owner to initialise whitelist addresses', async () => {})
+    it('allows contract owner to enable/disable the whitelist', async () => {})
+    it('allows contract owner to add addresses to the whitelist', async () => {})
+    it('allows contract owner to remove addresses from the whitelist', async () => {})
   })
 })
