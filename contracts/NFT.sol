@@ -1,14 +1,14 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
+import '@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/utils/Counters.sol';
 import './ERC2981.sol';
 import './Whitelist.sol';
 import 'hardhat/console.sol';
 
-contract NFT is ERC721, Ownable, ERC2981, Whitelist {
+contract NFT is ERC721URIStorage, Ownable, ERC2981, Whitelist {
   // Event indicating metadata was updated.
   event TokenURIUpdated(uint256 indexed _tokenId, string _uri);
 
@@ -66,7 +66,7 @@ contract NFT is ERC721, Ownable, ERC2981, Whitelist {
     uint256 currentTokenId = _tokenIds.current();
 
     _safeMint(to, currentTokenId);
-    setTokenURI(currentTokenId, tokenURI);
+    _setTokenURI(currentTokenId, tokenURI);
     tokenCreators[currentTokenId] = msg.sender;
 
     if (royaltyValue > 0) {
@@ -92,12 +92,8 @@ contract NFT is ERC721, Ownable, ERC2981, Whitelist {
     onlyTokenOwner(_tokenId)
     onlyTokenCreator(_tokenId)
   {
-    setTokenURI(_tokenId, _uri);
+    _setTokenURI(_tokenId, _uri);
     emit TokenURIUpdated(_tokenId, _uri);
-  }
-
-  function setTokenURI(uint256 _tokenId, string memory newURI) internal {
-    _uris[_tokenId] = newURI;
   }
 
   function transferToken(
@@ -128,9 +124,9 @@ contract NFT is ERC721, Ownable, ERC2981, Whitelist {
 
   // ----------------------- Read Functions --------------------------- //
 
-  function getTokenURI(uint256 _tokenId) public view returns (string memory) {
-    return (_uris[_tokenId]);
-  }
+  // function getTokenURI(uint256 _tokenId) public view returns (string memory) {
+  //   return (_uris[_tokenId]);
+  // }
 
   /**
    * @dev Gets the creator of the token.

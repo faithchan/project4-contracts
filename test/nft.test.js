@@ -6,6 +6,7 @@ const { ethers } = require('hardhat')
 describe('NFT', () => {
   let marketplace
   let nft
+  let marketplaceRoyalty = 500
   let royaltyAmount = 600
   let newRoyaltyAmount = 700
   let salePrice = 100
@@ -15,7 +16,7 @@ describe('NFT', () => {
   beforeEach(async () => {
     ;[contractOwner, minter, receiver, operator, whitelistAdd1, whitelistAdd2] = await ethers.getSigners()
     const Marketplace = await hre.ethers.getContractFactory('Marketplace')
-    marketplace = await Marketplace.deploy()
+    marketplace = await Marketplace.deploy(marketplaceRoyalty)
     await marketplace.deployed()
 
     const NFT = await ethers.getContractFactory('NFT')
@@ -60,7 +61,7 @@ describe('NFT', () => {
     })
 
     it('sets tokenURI upon minting', async () => {
-      expect(await nft.getTokenURI(tokenId)).to.equal(token1URI)
+      expect(await nft.tokenURI(tokenId)).to.equal(token1URI)
     })
 
     it('reverts on mint to null address', async () => {
@@ -132,7 +133,7 @@ describe('NFT', () => {
 
     it('allows creator to update URI if they are also the owner', async () => {
       await nft.connect(minter).updateTokenMetadata(tokenId, token2URI)
-      expect(await nft.getTokenURI(tokenId)).to.equal(token2URI)
+      expect(await nft.tokenURI(tokenId)).to.equal(token2URI)
     })
 
     it('emits a TokenURIUpdated event', async () => {
