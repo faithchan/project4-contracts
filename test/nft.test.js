@@ -1,4 +1,4 @@
-const { BN, constants, expectEvent, expectRevert } = require('@openzeppelin/test-helpers')
+const { BN, constants, expectRevert } = require('@openzeppelin/test-helpers')
 const { ZERO_ADDRESS } = constants
 const { expect } = require('chai')
 const { ethers } = require('hardhat')
@@ -182,9 +182,50 @@ describe('NFT', () => {
   })
 
   describe('Whitelisting', async () => {
-    it('allows contract owner to initialise whitelist addresses', async () => {})
-    it('allows contract owner to enable/disable the whitelist', async () => {})
-    it('allows contract owner to add addresses to the whitelist', async () => {})
-    it('allows contract owner to remove addresses from the whitelist', async () => {})
+    it('allows contract owner to initialise whitelist addresses', async () => {
+      await nft.initWhitelist([whitelistAdd1.address, whitelistAdd2.address])
+      expect(await nft.isWhitelisted(whitelistAdd1.address)).to.equal(true)
+      expect(await nft.isWhitelisted(whitelistAdd2.address)).to.equal(true)
+    })
+    it('allows anyone to mint when whitelist is disabled', async () => {
+      await nft.enableWhitelist(false)
+      await nft.connect(minter).mint(minter.address, token1URI, minter.address, royaltyAmount)
+    })
+
+    it('allows contract owner to add addresses to the whitelist', async () => {
+      await nft.addToWhitelist(whitelistAdd1.address)
+      expect(await nft.isWhitelisted(whitelistAdd1.address)).to.equal(true)
+    })
+
+    it('allows contract owner to remove addresses from the whitelist', async () => {
+      await nft.addToWhitelist(whitelistAdd1.address)
+      expect(await nft.isWhitelisted(whitelistAdd1.address)).to.equal(true)
+      await nft.removeFromWhitelist(whitelistAdd1.address)
+      expect(await nft.isWhitelisted(whitelistAdd1.address)).to.equal(false)
+    })
+
+    it('reverts if non-contract owner attempts to initialist whitelist addresses', async () => {
+      await expectRevert(
+        nft.connect(minter).initWhitelist([whitelistAdd1.address, whitelistAdd2.address]),
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('reverts if non-contract owner attempts to disable the whitelist', async () => {
+      await expectRevert(nft.connect(minter).enableWhitelist(false), 'Ownable: caller is not the owner')
+    })
+
+    it('reverts if non-contract owner attempts to add addresses to whitelist', async () => {
+      await expectRevert(nft.connect(minter).addToWhitelist(whitelistAdd1.address), 'Ownable: caller is not the owner')
+    })
+
+    it('reverts if non-contract owner attempts to remove addresses from the whitelist', async () => {
+      await nft.addToWhitelist(whitelistAdd1.address)
+      expect(await nft.isWhitelisted(whitelistAdd1.address)).to.equal(true)
+      await expectRevert(
+        nft.connect(minter).removeFromWhitelist(whitelistAdd1.address),
+        'Ownable: caller is not the owner'
+      )
+    })
   })
 })
