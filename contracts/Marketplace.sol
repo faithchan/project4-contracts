@@ -21,7 +21,7 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
     @notice Royalties charged by the marketplace 
     @dev Value set in constructor 
  */
-  uint256 public royalties;
+  uint256 public marketplaceFee;
 
   /// @notice maps itemId to Item struct
   mapping(uint256 => Item) private MarketItems;
@@ -52,11 +52,11 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
 
   /** 
     @notice Sets the owner of the Marketplace contract as the contract deployer, and initializes proportion of royalties that will go to the marketplace.
-    @param royalty takes a value between 0-10000
+    @param fee takes a value between 0-10000
  */
-  constructor(uint256 royalty) {
+  constructor(uint256 fee) {
     marketplaceOwner = payable(msg.sender);
-    royalties = royalty;
+    marketplaceFee = fee;
   }
 
   /**
@@ -95,21 +95,19 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
     require(isForSale == true, 'Item requested is not for sale.');
     require(msg.value == salePrice, 'Please submit the correct amount of ether.');
 
-    // get RoyaltyInfo from nft contract
-
     (address royaltyReceiver, uint256 royaltyAmount) = ERC2981(nftAddress).royaltyInfo(_tokenId, salePrice);
     console.log('royalty receiver: ', royaltyReceiver);
     console.log('royalty amount: ', royaltyAmount);
 
-    uint256 marketplaceFee = ((royalties * msg.value) / 10000);
-    uint256 etherToSeller = msg.value - marketplaceFee - royaltyAmount;
+    uint256 feeToMarketplace = ((marketplaceFee * msg.value) / 10000);
+    uint256 etherToSeller = msg.value - feeToMarketplace - royaltyAmount;
 
     IERC721(nftAddress).transferFrom(owner, msg.sender, _tokenId);
 
     MarketItems[_itemId].owner = payable(msg.sender);
     MarketItems[_itemId].isListed = false;
 
-    transferEther(marketplaceOwner, marketplaceFee);
+    transferEther(marketplaceOwner, feeToMarketplace);
     transferEther(royaltyReceiver, royaltyAmount);
     transferEther(owner, etherToSeller);
   }
@@ -117,6 +115,10 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
   function transferEther(address receiver, uint256 amount) internal {
     (bool transferSuccess, ) = payable(receiver).call{ value: amount }('');
     require(transferSuccess, 'Failed to transfer royalties to marketplace.');
+  }
+
+  function updateMarketplaceFee(uint256 newFee) public onlyOwner {
+    marketplaceFee = newFee;
   }
 
   // ------------------ Read Functions ---------------------- //
