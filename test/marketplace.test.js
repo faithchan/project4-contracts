@@ -32,6 +32,7 @@ describe('Marketplace', () => {
 
   describe('listItem', async () => {
     let tokenId
+    let itemId
     beforeEach(async () => {
       await nft.addToWhitelist(seller.address)
       const token = await nft.connect(seller).mint(seller.address, token1URI, seller.address, royaltyAmount)
@@ -40,22 +41,26 @@ describe('Marketplace', () => {
     })
 
     it('allows owner of token to list item for sale', async () => {
-      await marketplace.connect(seller).listItem(nft.address, tokenId, salePrice)
+      const txn = await marketplace.connect(seller).listItem(nft.address, tokenId, salePrice)
+      const receipt = await txn.wait()
+      itemId = receipt.events[0].args.itemId
+      const item = await marketplace.getItemById(itemId)
+      expect(item['isListed']).to.equal(true)
     })
 
     it('reverts if non-owner attempts to list item', async () => {})
   })
 
-  describe('purchaseItem', async () => {
-    beforeEach(async () => {
-      await nft.addToWhitelist(seller.address)
-      const token = await nft.connect(seller).mint(seller.address, token1URI, seller.address, royaltyAmount)
-      const txn = await token.wait()
-      tokenId = txn.events[0].args.tokenId
-    })
-    it('transfers token to buyer', async () => {})
-    it('transfers marketplace fee to contract owner', async () => {})
-    it('transfers royalties to the creator of the token', async () => {})
-    it('reverts if ether sent does not equal to the salePrice', async () => {})
-  })
+  // describe('purchaseItem', async () => {
+  //   beforeEach(async () => {
+  //     await nft.addToWhitelist(seller.address)
+  //     const token = await nft.connect(seller).mint(seller.address, token1URI, seller.address, royaltyAmount)
+  //     const txn = await token.wait()
+  //     tokenId = txn.events[0].args.tokenId
+  //   })
+  //   it('transfers token to buyer', async () => {})
+  //   it('transfers marketplace fee to contract owner', async () => {})
+  //   it('transfers royalties to the creator of the token', async () => {})
+  //   it('reverts if ether sent does not equal to the salePrice', async () => {})
+  // })
 })
