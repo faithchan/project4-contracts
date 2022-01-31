@@ -72,6 +72,7 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
     uint256 price
   ) public returns (uint256 _itemId) {
     require(IERC721(nftAddress).ownerOf(_tokenId) == msg.sender, 'Caller does not own token');
+    require(price >= 0, 'List price should be more than zero');
 
     uint256 itemId = _itemIds.current();
     MarketItems[itemId] = Item(nftAddress, _tokenId, itemId, payable(msg.sender), price, true);
@@ -112,10 +113,9 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
     transferEther(owner, etherToSeller);
   }
 
-  function transferEther(address receiver, uint256 amount) internal {
-    // console.log('transfering', amount, 'to: ', receiver);
-    (bool transferSuccess, ) = payable(receiver).call{ value: amount }('');
-    require(transferSuccess, 'Failed to transfer royalties to marketplace.');
+  function updateListingPrice(uint256 _itemId, uint256 newPrice) public onlyItemOwner(_itemId) {
+    require(newPrice >= 0, 'List price should be more than zero');
+    MarketItems[_itemId].price = newPrice;
   }
 
   function updateMarketplaceFee(uint256 newFee) public onlyOwner {
@@ -130,6 +130,12 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
   function delistItem(uint256 _itemId) public onlyItemOwner(_itemId) {
     require(MarketItems[_itemId].isListed == true, 'Item is not listed.');
     MarketItems[_itemId].isListed = false;
+  }
+
+  function transferEther(address receiver, uint256 amount) internal {
+    // console.log('transfering', amount, 'to: ', receiver);
+    (bool transferSuccess, ) = payable(receiver).call{ value: amount }('');
+    require(transferSuccess, 'Failed to transfer royalties to marketplace.');
   }
 
   // ------------------ Read Functions ---------------------- //

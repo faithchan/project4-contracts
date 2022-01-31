@@ -23,7 +23,7 @@ describe('Marketplace', () => {
     await nft.deployed()
   })
 
-  describe('Deployment', async () => {
+  describe('Deployment', () => {
     it('sets the owner as contract deployer', async () => {
       expect(await marketplace.owner()).to.equal(contractOwner.address)
     })
@@ -32,7 +32,7 @@ describe('Marketplace', () => {
     })
   })
 
-  describe('listItem', async () => {
+  describe('listItem', () => {
     let tokenId
     let itemId
     beforeEach(async () => {
@@ -60,7 +60,7 @@ describe('Marketplace', () => {
     })
   })
 
-  describe('purchaseItem', async () => {
+  describe('purchaseItem', () => {
     let tokenId
     let itemId
     const feeToMarketplace = salePrice.mul(marketplaceFee).div(10000)
@@ -139,19 +139,59 @@ describe('Marketplace', () => {
     })
   })
 
-  describe('Deslisting', async () => {
-    beforeEach(async () => {})
-    it('delists a listed item', async () => {})
-    it('reverts if item is already listed', async () => {})
+  describe('Delisting', () => {
+    let tokenId
+    let itemId
+    beforeEach(async () => {
+      await nft.addToWhitelist(seller.address)
+      const token = await nft
+        .connect(seller)
+        .mint(seller.address, token1URI, seller.address, royaltyAmount)
+      let txn = await token.wait()
+      tokenId = txn.events[0].args.tokenId
+
+      txn = await marketplace.connect(seller).listItem(nft.address, tokenId, salePrice)
+      const receipt = await txn.wait()
+      itemId = receipt.events[0].args.itemId
+    })
+
+    it('successfully delists listed item', async () => {
+      await marketplace.connect(seller).delistItem(itemId)
+      const item = await marketplace.getItemById(itemId)
+      expect(item['isListed']).to.equal(false)
+    })
+
+    it('reverts if caller is not the owner of item', async () => {
+      await expectRevert(marketplace.delistItem(itemId), 'Caller is not item owner')
+    })
+
+    it('reverts if item is not listed', async () => {
+      await marketplace.connect(seller).delistItem(itemId)
+      await expectRevert(marketplace.connect(seller).delistItem(itemId), 'Item is not listed.')
+    })
   })
 
-  describe('Changing item list price', async () => {
-    beforeEach(async () => {})
+  describe('Changing item list price', () => {
+    let tokenId
+    let itemId
+    beforeEach(async () => {
+      await nft.addToWhitelist(seller.address)
+      const token = await nft
+        .connect(seller)
+        .mint(seller.address, token1URI, seller.address, royaltyAmount)
+      let txn = await token.wait()
+      tokenId = txn.events[0].args.tokenId
+
+      txn = await marketplace.connect(seller).listItem(nft.address, tokenId, salePrice)
+      const receipt = await txn.wait()
+      itemId = receipt.events[0].args.itemId
+    })
+
     it('updates listing price successfully', async () => {})
     it('reverts if caller is owner of item', async () => {})
   })
 
-  describe('Updating marketplace fees', async () => {
+  describe('Updating marketplace fees', () => {
     beforeEach(async () => {})
     it('updates marketplace fees successfully', async () => {})
     it('reverts if caller is not owner of marketplace contract', async () => {})
