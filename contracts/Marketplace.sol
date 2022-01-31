@@ -59,6 +59,8 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
     marketplaceFee = fee;
   }
 
+  // ------------------ Mutative Functions ---------------------- //
+
   /**
     @notice Executes listing of item by adding new items into the mapping. Requires holder to call setApprovalForAll before calling this function. 
     @dev Transfers the NFT from the owner's wallet to the marketplace. 
@@ -167,6 +169,29 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
       }
     }
     return listedItems;
+  }
+
+  function getItemsOwned() public view returns (Item[] memory) {
+    uint256 totalItemCount = _itemIds.current();
+    uint256 myItemsCount = 0;
+    uint256 resultItemId = 0;
+
+    for (uint256 i = 0; i < totalItemCount; i++) {
+      if (MarketItems[i + 1].owner == msg.sender) {
+        myItemsCount++;
+      }
+    }
+
+    Item[] memory ownedItems = new Item[](myItemsCount);
+    for (uint256 i = 0; i < totalItemCount; i++) {
+      if (MarketItems[i + 1].owner == msg.sender) {
+        uint256 thisItemId = MarketItems[i + 1].itemId;
+        Item storage thisItem = MarketItems[thisItemId];
+        ownedItems[resultItemId] = thisItem;
+        resultItemId++;
+      }
+    }
+    return ownedItems;
   }
 
   // ------------------ Modifiers ---------------------- //
