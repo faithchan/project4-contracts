@@ -123,6 +123,16 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
     marketplaceFee = newFee;
   }
 
+  /**
+    @notice Allows the owner of the NFT to delist their item
+    @dev Requires the caller to be the owner of the item 
+    @param _itemId itemId of the NFT to be delisted
+  */
+  function delistItem(uint256 _itemId) public onlyItemOwner(_itemId) {
+    require(MarketItems[_itemId].isListed == true, 'Item is not listed.');
+    MarketItems[_itemId].isListed = false;
+  }
+
   // ------------------ Read Functions ---------------------- //
 
   function getItemById(uint256 _itemId) public view returns (Item memory) {
@@ -154,8 +164,8 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
 
   // ------------------ Modifiers ---------------------- //
 
-  modifier onlyItemOwner(uint256 id) {
-    require(MarketItems[id].owner == msg.sender, 'Caller is not item owner');
+  modifier onlyItemOwner(uint256 _itemId) {
+    require(MarketItems[_itemId].owner == msg.sender, 'Caller is not item owner');
     _;
   }
 }
