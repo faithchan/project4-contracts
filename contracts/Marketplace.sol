@@ -71,7 +71,7 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
     uint256 _tokenId,
     uint256 price
   ) public {
-    // check that caller owns item
+    require(IERC721(nftAddress).ownerOf(_tokenId) == msg.sender, 'Caller does not own token');
     _itemIds.increment();
     uint256 itemId = _itemIds.current();
     MarketItems[itemId] = Item(nftAddress, _tokenId, itemId, payable(msg.sender), price, true);
