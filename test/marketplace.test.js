@@ -1,3 +1,4 @@
+const { BN, constants, expectRevert } = require('@openzeppelin/test-helpers')
 const { expect } = require('chai')
 const { ethers } = require('hardhat')
 
@@ -48,7 +49,9 @@ describe('Marketplace', () => {
       expect(item['isListed']).to.equal(true)
     })
 
-    it('reverts if non-owner attempts to list item', async () => {})
+    it('reverts if non-owner attempts to list item', async () => {
+      await expectRevert(marketplace.listItem(nft.address, tokenId, salePrice), 'Caller does not own token')
+    })
   })
 
   // describe('purchaseItem', async () => {
