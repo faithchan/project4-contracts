@@ -98,8 +98,6 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
     require(msg.value == salePrice, 'Please submit the correct amount of ether.');
 
     (address royaltyReceiver, uint256 royaltyAmount) = ERC2981(nftAddress).royaltyInfo(_tokenId, salePrice);
-    console.log('royalty receiver: ', royaltyReceiver);
-    console.log('royalty amount: ', royaltyAmount);
 
     uint256 feeToMarketplace = ((marketplaceFee * msg.value) / 10000);
     uint256 etherToSeller = msg.value - feeToMarketplace - royaltyAmount;
@@ -115,6 +113,7 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
   }
 
   function transferEther(address receiver, uint256 amount) internal {
+    // console.log('transfering', amount, 'to: ', receiver);
     (bool transferSuccess, ) = payable(receiver).call{ value: amount }('');
     require(transferSuccess, 'Failed to transfer royalties to marketplace.');
   }

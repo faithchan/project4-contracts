@@ -8,6 +8,7 @@ describe('Marketplace', () => {
   let marketplaceFee = ethers.BigNumber.from(250)
   let royaltyAmount = ethers.BigNumber.from(500)
   let salePrice = ethers.BigNumber.from(ethers.utils.parseEther('10'))
+  const provider = ethers.provider
   const token1URI = 'https://ipfs.io/ipfs/QmXmNSH2dyp5R6dkW5MVhNc7xqV9v3NHWxNXJfCL6CcYxS'
   const token2URI = 'https://ipfs.io/ipfs/QmQ35DkX8HHjhkJe5MsMAd4X51iP3MHV5d5dZoee32J83k'
 
@@ -62,6 +63,10 @@ describe('Marketplace', () => {
   describe('purchaseItem', async () => {
     let tokenId
     let itemId
+    const feeToMarketplace = salePrice.mul(marketplaceFee).div(10000)
+    const royaltyToCreator = salePrice.mul(royaltyAmount).div(10000)
+    const revenueToSeller = salePrice.sub(feeToMarketplace).sub(royaltyToCreator)
+
     beforeEach(async () => {
       await nft.addToWhitelist(seller.address)
       const token = await nft
@@ -79,10 +84,32 @@ describe('Marketplace', () => {
 
     it('transfers token to buyer', async () => {
       await marketplace.connect(buyer).purchaseItem(nft.address, itemId, { value: salePrice })
+      expect(await nft.balanceOf(seller.address)).to.equal(0)
+      expect(await nft.balanceOf(buyer.address)).to.equal(1)
     })
 
-    it('transfers marketplace fee to contract owner', async () => {})
-    it('transfers royalties to the creator of the token', async () => {})
+    it('transfers sale price to seller of item', async () => {
+      const sellerBalance = await provider.getBalance(seller.address)
+      await marketplace.connect(buyer).purchaseItem(nft.address, itemId, { value: salePrice })
+      const newSellerBalance = await provider.getBalance(seller.address)
+      expect(newSellerBalance.sub(sellerBalance)).to.be.gte(revenueToSeller)
+    })
+
+    it('transfers royalties to the creator of the token', async () => {
+      const creator = await nft.tokenCreator(tokenId)
+      const creatorBalance = await provider.getBalance(creator)
+      await marketplace.connect(buyer).purchaseItem(nft.address, itemId, { value: salePrice })
+      const newCreatorBalance = await provider.getBalance(creator)
+      expect(newCreatorBalance.sub(creatorBalance)).to.be.gte(royaltyToCreator)
+    })
+
+    it('transfers marketplace fee to contract owner', async () => {
+      const marketplaceBalance = await provider.getBalance(contractOwner.address)
+      await marketplace.connect(buyer).purchaseItem(nft.address, itemId, { value: salePrice })
+      const newMarketplaceBalance = await provider.getBalance(contractOwner.address)
+      expect(newMarketplaceBalance.sub(marketplaceBalance)).to.be.gte(feeToMarketplace)
+    })
+
     it('reverts if ether sent does not equal to the salePrice', async () => {})
   })
 })
