@@ -6,7 +6,7 @@
 // describe('NFT', () => {
 //   let marketplace
 //   let nft
-//   let marketplaceRoyalty = 500
+//   let marketplaceFee = 500
 //   let royaltyAmount = 600
 //   let newRoyaltyAmount = 700
 //   let salePrice = 100
@@ -16,7 +16,7 @@
 //   beforeEach(async () => {
 //     ;[contractOwner, minter, receiver, operator, whitelistAdd1, whitelistAdd2] = await ethers.getSigners()
 //     const Marketplace = await hre.ethers.getContractFactory('Marketplace')
-//     marketplace = await Marketplace.deploy(marketplaceRoyalty)
+//     marketplace = await Marketplace.deploy(marketplaceFee)
 //     await marketplace.deployed()
 
 //     const NFT = await ethers.getContractFactory('NFT')
