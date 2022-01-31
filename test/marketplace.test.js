@@ -116,6 +116,12 @@ describe('Marketplace', () => {
       expect(item['isListed']).to.equal(false)
     })
 
+    it('sets the new owner of the item as buyer', async () => {
+      await marketplace.connect(buyer).purchaseItem(nft.address, itemId, { value: salePrice })
+      const item = await marketplace.getItemById(itemId)
+      expect(item['owner']).to.equal(buyer.address)
+    })
+
     it('reverts if ether sent does not equal to the salePrice', async () => {
       let incorrectSalePrice = ethers.BigNumber.from(ethers.utils.parseEther('9'))
       await expectRevert(
@@ -123,5 +129,31 @@ describe('Marketplace', () => {
         'Please send the correct amount of ether'
       )
     })
+
+    it('reverts if attempting to buy an unlisted item', async () => {
+      await marketplace.connect(seller).delistItem(itemId)
+      await expectRevert(
+        marketplace.connect(buyer).purchaseItem(nft.address, itemId, { value: salePrice }),
+        'Item requested is not for sale.'
+      )
+    })
+  })
+
+  describe('Deslisting', async () => {
+    beforeEach(async () => {})
+    it('delists a listed item', async () => {})
+    it('reverts if item is already listed', async () => {})
+  })
+
+  describe('Changing item list price', async () => {
+    beforeEach(async () => {})
+    it('updates listing price successfully', async () => {})
+    it('reverts if caller is owner of item', async () => {})
+  })
+
+  describe('Updating marketplace fees', async () => {
+    beforeEach(async () => {})
+    it('updates marketplace fees successfully', async () => {})
+    it('reverts if caller is not owner of marketplace contract', async () => {})
   })
 })
