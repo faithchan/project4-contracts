@@ -1,8 +1,10 @@
 const hre = require('hardhat')
 
 async function main() {
+  let marketplaceFee = ethers.BigNumber.from(250)
+
   const Marketplace = await hre.ethers.getContractFactory('Marketplace')
-  marketplace = await Marketplace.deploy()
+  marketplace = await Marketplace.deploy(marketplaceFee)
   await marketplace.deployed()
   console.log('Marketplace deployed to:', marketplace.address)
 
