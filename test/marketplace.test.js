@@ -174,6 +174,7 @@ describe('Marketplace', () => {
   describe('Changing item list price', () => {
     let tokenId
     let itemId
+    let newPrice = ethers.BigNumber.from(ethers.utils.parseEther('5'))
     beforeEach(async () => {
       await nft.addToWhitelist(seller.address)
       const token = await nft
@@ -187,13 +188,29 @@ describe('Marketplace', () => {
       itemId = receipt.events[0].args.itemId
     })
 
-    it('updates listing price successfully', async () => {})
-    it('reverts if caller is owner of item', async () => {})
+    it('updates listing price successfully', async () => {
+      await marketplace.connect(seller).updateListPrice(itemId, newPrice)
+      const item = await marketplace.getItemById(itemId)
+      expect(item['price']).to.equal(newPrice)
+    })
+
+    it('reverts if caller is not owner of item', async () => {
+      await expectRevert(marketplace.updateListPrice(itemId, newPrice), 'Caller is not item owner')
+    })
   })
 
   describe('Updating marketplace fees', () => {
-    beforeEach(async () => {})
-    it('updates marketplace fees successfully', async () => {})
-    it('reverts if caller is not owner of marketplace contract', async () => {})
+    let newMarketplaceFee = ethers.BigNumber.from(150)
+    it('updates marketplace fees successfully', async () => {
+      await marketplace.updateMarketplaceFee(newMarketplaceFee)
+      expect(await marketplace.marketplaceFee()).to.equal(newMarketplaceFee)
+    })
+
+    it('reverts if caller is not owner of marketplace contract', async () => {
+      await expectRevert(
+        marketplace.connect(seller).updateMarketplaceFee(newMarketplaceFee),
+        'Ownable: caller is not the owner'
+      )
+    })
   })
 })

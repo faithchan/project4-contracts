@@ -72,14 +72,15 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
     uint256 price
   ) public returns (uint256 _itemId) {
     require(IERC721(nftAddress).ownerOf(_tokenId) == msg.sender, 'Caller does not own token');
-    require(price >= 0, 'List price should be more than zero');
 
-    uint256 itemId = _itemIds.current();
-    MarketItems[itemId] = Item(nftAddress, _tokenId, itemId, payable(msg.sender), price, true);
-    _itemIds.increment();
+    if (price > 0) {
+      uint256 itemId = _itemIds.current();
+      MarketItems[itemId] = Item(nftAddress, _tokenId, itemId, payable(msg.sender), price, true);
+      _itemIds.increment();
 
-    emit ItemListed(nftAddress, _tokenId, itemId, msg.sender, price, true);
-    return itemId;
+      emit ItemListed(nftAddress, _tokenId, itemId, msg.sender, price, true);
+      return itemId;
+    }
   }
 
   /**
@@ -113,9 +114,10 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
     transferEther(owner, etherToSeller);
   }
 
-  function updateListingPrice(uint256 _itemId, uint256 newPrice) public onlyItemOwner(_itemId) {
-    require(newPrice >= 0, 'List price should be more than zero');
-    MarketItems[_itemId].price = newPrice;
+  function updateListPrice(uint256 _itemId, uint256 newPrice) public onlyItemOwner(_itemId) {
+    if (newPrice > 0) {
+      MarketItems[_itemId].price = newPrice;
+    }
   }
 
   function updateMarketplaceFee(uint256 newFee) public onlyOwner {
