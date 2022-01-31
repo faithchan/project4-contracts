@@ -110,6 +110,18 @@ describe('Marketplace', () => {
       expect(newMarketplaceBalance.sub(marketplaceBalance)).to.be.gte(feeToMarketplace)
     })
 
-    it('reverts if ether sent does not equal to the salePrice', async () => {})
+    it('changes item listed status to false', async () => {
+      await marketplace.connect(buyer).purchaseItem(nft.address, itemId, { value: salePrice })
+      const item = await marketplace.getItemById(itemId)
+      expect(item['isListed']).to.equal(false)
+    })
+
+    it('reverts if ether sent does not equal to the salePrice', async () => {
+      let incorrectSalePrice = ethers.BigNumber.from(ethers.utils.parseEther('9'))
+      await expectRevert(
+        marketplace.connect(buyer).purchaseItem(nft.address, itemId, { value: incorrectSalePrice }),
+        'Please send the correct amount of ether'
+      )
+    })
   })
 })

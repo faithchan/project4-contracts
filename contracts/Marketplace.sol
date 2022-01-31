@@ -95,7 +95,7 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
     address owner = MarketItems[_itemId].owner;
 
     require(isForSale == true, 'Item requested is not for sale.');
-    require(msg.value == salePrice, 'Please submit the correct amount of ether.');
+    require(msg.value == salePrice, 'Please send the correct amount of ether.');
 
     (address royaltyReceiver, uint256 royaltyAmount) = ERC2981(nftAddress).royaltyInfo(_tokenId, salePrice);
 
