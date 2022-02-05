@@ -10,7 +10,7 @@ import '@openzeppelin/contracts/utils/math/SafeCast.sol';
 import './ERC2981.sol';
 import 'hardhat/console.sol';
 
-contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
+contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard, ERC2981 {
   /// @notice itemId to keep track of the number of items listed for sale on the marketplace
   using Counters for Counters.Counter;
   Counters.Counter private _itemIds;
@@ -38,11 +38,6 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
     address payable owner;
     uint256 price;
     bool isListed;
-  }
-
-  struct RoyaltyInfo {
-    address receiver;
-    uint96 royaltyFraction;
   }
 
   event ItemListed(
@@ -82,7 +77,7 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
 
     if (royaltyValue > 0) {
       uint96 value = toUint96(royaltyValue);
-      ERC2981(nftAddress).setTokenRoyalty(_tokenId, msg.sender, value);
+      _setTokenRoyalty(_tokenId, msg.sender, value);
     }
 
     if (price > 0) {

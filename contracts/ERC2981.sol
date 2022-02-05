@@ -103,19 +103,19 @@ abstract contract ERC2981 is IERC2981, ERC165 {
     delete _defaultRoyaltyInfo;
   }
 
-  /// @dev Sets token royalties
-  /// @param tokenId the token id fir which we register the royalties
-  /// @param recipient recipient of the royalties
-  /// @param value percentage (using 2 decimals - 10000 = 100, 0 = 0)
-  function setTokenRoyalty(
-    uint256 tokenId,
-    address recipient,
-    uint96 value
-  ) public {
-    require(value <= 10000, 'ERC2981Royalties: Too high');
+  // /// @dev Sets token royalties
+  // /// @param tokenId the token id fir which we register the royalties
+  // /// @param recipient recipient of the royalties
+  // /// @param value percentage (using 2 decimals - 10000 = 100, 0 = 0)
+  // function setTokenRoyalty(
+  //   uint256 tokenId,
+  //   address recipient,
+  //   uint96 value
+  // ) public {
+  //   require(value <= 10000, 'ERC2981Royalties: Too high');
 
-    _setTokenRoyalty(tokenId, recipient, value);
-  }
+  //   _setTokenRoyalty(tokenId, recipient, value);
+  // }
 
   /**
    * @dev Sets the royalty information for a specific token id, overriding the global default.
