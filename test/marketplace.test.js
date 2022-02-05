@@ -37,15 +37,15 @@ describe('Marketplace', () => {
     let itemId
     beforeEach(async () => {
       await nft.addToWhitelist(seller.address)
-      const token = await nft
-        .connect(seller)
-        .mint(seller.address, token1URI, seller.address, royaltyAmount)
+      const token = await nft.connect(seller).mint(seller.address, token1URI)
       const txn = await token.wait()
       tokenId = txn.events[0].args.tokenId
     })
 
     it('allows owner of token to list item for sale', async () => {
-      const txn = await marketplace.connect(seller).listItem(nft.address, tokenId, salePrice)
+      const txn = await marketplace
+        .connect(seller)
+        .listItem(nft.address, tokenId, salePrice, royaltyAmount)
       const receipt = await txn.wait()
       itemId = receipt.events[0].args.itemId
       const item = await marketplace.getItemById(itemId)
@@ -54,7 +54,7 @@ describe('Marketplace', () => {
 
     it('reverts if non-owner attempts to list item', async () => {
       await expectRevert(
-        marketplace.listItem(nft.address, tokenId, salePrice),
+        marketplace.listItem(nft.address, tokenId, salePrice, royaltyAmount),
         'Caller does not own token'
       )
     })
@@ -69,13 +69,13 @@ describe('Marketplace', () => {
 
     beforeEach(async () => {
       await nft.addToWhitelist(seller.address)
-      const token = await nft
-        .connect(seller)
-        .mint(seller.address, token1URI, seller.address, royaltyAmount)
+      const token = await nft.connect(seller).mint(seller.address, token1URI)
       let txn = await token.wait()
       tokenId = txn.events[0].args.tokenId
 
-      txn = await marketplace.connect(seller).listItem(nft.address, tokenId, salePrice)
+      txn = await marketplace
+        .connect(seller)
+        .listItem(nft.address, tokenId, salePrice, royaltyAmount)
       const receipt = await txn.wait()
       itemId = receipt.events[0].args.itemId
 
@@ -144,13 +144,13 @@ describe('Marketplace', () => {
     let itemId
     beforeEach(async () => {
       await nft.addToWhitelist(seller.address)
-      const token = await nft
-        .connect(seller)
-        .mint(seller.address, token1URI, seller.address, royaltyAmount)
+      const token = await nft.connect(seller).mint(seller.address, token1URI)
       let txn = await token.wait()
       tokenId = txn.events[0].args.tokenId
 
-      txn = await marketplace.connect(seller).listItem(nft.address, tokenId, salePrice)
+      txn = await marketplace
+        .connect(seller)
+        .listItem(nft.address, tokenId, salePrice, royaltyAmount)
       const receipt = await txn.wait()
       itemId = receipt.events[0].args.itemId
     })
@@ -177,13 +177,13 @@ describe('Marketplace', () => {
     let newPrice = ethers.BigNumber.from(ethers.utils.parseEther('5'))
     beforeEach(async () => {
       await nft.addToWhitelist(seller.address)
-      const token = await nft
-        .connect(seller)
-        .mint(seller.address, token1URI, seller.address, royaltyAmount)
+      const token = await nft.connect(seller).mint(seller.address, token1URI)
       let txn = await token.wait()
       tokenId = txn.events[0].args.tokenId
 
-      txn = await marketplace.connect(seller).listItem(nft.address, tokenId, salePrice)
+      txn = await marketplace
+        .connect(seller)
+        .listItem(nft.address, tokenId, salePrice, royaltyAmount)
       const receipt = await txn.wait()
       itemId = receipt.events[0].args.itemId
     })
