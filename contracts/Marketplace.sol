@@ -6,6 +6,7 @@ import '@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol';
 import '@openzeppelin/contracts/utils/Counters.sol';
 import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
+import '@openzeppelin/contracts/utils/math/SafeCast.sol';
 import './ERC2981.sol';
 import 'hardhat/console.sol';
 
@@ -13,6 +14,9 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
   /// @notice itemId to keep track of the number of items listed for sale on the marketplace
   using Counters for Counters.Counter;
   Counters.Counter private _itemIds;
+
+  /// @notice for converting royalty values from uint256 to uint96
+  using SafeCast for uint256;
 
   /// @dev owner of the marketplace contract, set in constructor
   address payable marketplaceOwner;
@@ -71,9 +75,15 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
   function listItem(
     address nftAddress,
     uint256 _tokenId,
-    uint256 price
+    uint256 price,
+    uint256 royaltyValue
   ) public returns (uint256 _itemId) {
     require(IERC721(nftAddress).ownerOf(_tokenId) == msg.sender, 'Caller does not own token');
+
+    if (royaltyValue > 0) {
+      uint96 value = toUint96(royaltyValue);
+      ERC2981(nftAddress).setTokenRoyalty(_tokenId, msg.sender, value);
+    }
 
     if (price > 0) {
       uint256 itemId = _itemIds.current();
@@ -101,7 +111,10 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
     require(isForSale == true, 'Item requested is not for sale.');
     require(msg.value == salePrice, 'Please send the correct amount of ether.');
 
-    (address royaltyReceiver, uint256 royaltyAmount) = ERC2981(nftAddress).royaltyInfo(_tokenId, salePrice);
+    (address royaltyReceiver, uint256 royaltyAmount) = ERC2981(nftAddress).royaltyInfo(
+      _tokenId,
+      salePrice
+    );
 
     uint256 feeToMarketplace = ((marketplaceFee * msg.value) / 10000);
     uint256 etherToSeller = msg.value - feeToMarketplace - royaltyAmount;
@@ -140,6 +153,10 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
     // console.log('transfering', amount, 'to: ', receiver);
     (bool transferSuccess, ) = payable(receiver).call{ value: amount }('');
     require(transferSuccess, 'Failed to transfer royalties to marketplace.');
+  }
+
+  function toUint96(uint256 a) public pure returns (uint96) {
+    return a.toUint96();
   }
 
   // ------------------ Read Functions ---------------------- //

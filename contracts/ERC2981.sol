@@ -33,7 +33,13 @@ abstract contract ERC2981 is IERC2981, ERC165 {
   /**
    * @dev See {IERC165-supportsInterface}.
    */
-  function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165, ERC165) returns (bool) {
+  function supportsInterface(bytes4 interfaceId)
+    public
+    view
+    virtual
+    override(IERC165, ERC165)
+    returns (bool)
+  {
     return interfaceId == type(IERC2981).interfaceId || super.supportsInterface(interfaceId);
   }
 
@@ -48,7 +54,13 @@ abstract contract ERC2981 is IERC2981, ERC165 {
   /**
    * @inheritdoc IERC2981
    */
-  function royaltyInfo(uint256 _tokenId, uint256 _salePrice) external view virtual override returns (address, uint256) {
+  function royaltyInfo(uint256 _tokenId, uint256 _salePrice)
+    external
+    view
+    virtual
+    override
+    returns (address, uint256)
+  {
     RoyaltyInfo memory royalty = _tokenRoyaltyInfo[_tokenId];
 
     if (royalty.receiver == address(0)) {
@@ -89,6 +101,20 @@ abstract contract ERC2981 is IERC2981, ERC165 {
    */
   function _deleteDefaultRoyalty() internal virtual {
     delete _defaultRoyaltyInfo;
+  }
+
+  /// @dev Sets token royalties
+  /// @param tokenId the token id fir which we register the royalties
+  /// @param recipient recipient of the royalties
+  /// @param value percentage (using 2 decimals - 10000 = 100, 0 = 0)
+  function setTokenRoyalty(
+    uint256 tokenId,
+    address recipient,
+    uint96 value
+  ) public {
+    require(value <= 10000, 'ERC2981Royalties: Too high');
+
+    _setTokenRoyalty(tokenId, recipient, value);
   }
 
   /**
