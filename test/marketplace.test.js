@@ -37,9 +37,7 @@ describe('Marketplace', () => {
     let itemId
     beforeEach(async () => {
       await nft.addToWhitelist(seller.address)
-      const token = await nft
-        .connect(seller)
-        .mint(seller.address, token1URI, seller.address, royaltyAmount)
+      const token = await nft.connect(seller).mint(seller.address, token1URI)
       const txn = await token.wait()
       tokenId = txn.events[0].args.tokenId
     })
@@ -69,9 +67,7 @@ describe('Marketplace', () => {
 
     beforeEach(async () => {
       await nft.addToWhitelist(seller.address)
-      const token = await nft
-        .connect(seller)
-        .mint(seller.address, token1URI, seller.address, royaltyAmount)
+      const token = await nft.connect(seller).mint(seller.address, token1URI)
       let txn = await token.wait()
       tokenId = txn.events[0].args.tokenId
 
@@ -144,9 +140,7 @@ describe('Marketplace', () => {
     let itemId
     beforeEach(async () => {
       await nft.addToWhitelist(seller.address)
-      const token = await nft
-        .connect(seller)
-        .mint(seller.address, token1URI, seller.address, royaltyAmount)
+      const token = await nft.connect(seller).mint(seller.address, token1URI)
       let txn = await token.wait()
       tokenId = txn.events[0].args.tokenId
 
@@ -177,9 +171,7 @@ describe('Marketplace', () => {
     let newPrice = ethers.BigNumber.from(ethers.utils.parseEther('5'))
     beforeEach(async () => {
       await nft.addToWhitelist(seller.address)
-      const token = await nft
-        .connect(seller)
-        .mint(seller.address, token1URI, seller.address, royaltyAmount)
+      const token = await nft.connect(seller).mint(seller.address, token1URI)
       let txn = await token.wait()
       tokenId = txn.events[0].args.tokenId
 

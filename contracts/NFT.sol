@@ -107,16 +107,11 @@ contract NFT is ERC721URIStorage, Ownable, ERC2981, Whitelist {
 
   /// @dev Sets token royalties
   /// @param tokenId the token id fir which we register the royalties
-  /// @param recipient recipient of the royalties
   /// @param value percentage (using 2 decimals - 10000 = 100, 0 = 0)
-  function setTokenRoyalty(
-    uint256 tokenId,
-    address recipient,
-    uint256 value
-  ) public onlyTokenOwner(tokenId) onlyTokenCreator(tokenId) {
+  function setTokenRoyalty(uint256 tokenId, uint256 value) public onlyTokenCreator(tokenId) {
     if (value > 0) {
       uint96 royaltyValue = toUint96(value);
-      _setTokenRoyalty(tokenId, recipient, royaltyValue);
+      _setTokenRoyalty(tokenId, msg.sender, royaltyValue);
     }
   }
 
@@ -134,10 +129,6 @@ contract NFT is ERC721URIStorage, Ownable, ERC2981, Whitelist {
 
   // ----------------------- Read Functions --------------------------- //
 
-  // function getTokenURI(uint256 _tokenId) public view returns (string memory) {
-  //   return (_uris[_tokenId]);
-  // }
-
   /**
    * @dev Gets the creator of the token.
    * @param _tokenId uint256 ID of the token.
@@ -147,16 +138,16 @@ contract NFT is ERC721URIStorage, Ownable, ERC2981, Whitelist {
     return tokenCreators[_tokenId];
   }
 
-  function royaltyInfo(uint256 tokenId, uint256 value)
-    external
-    view
-    override
-    returns (address receiver, uint256 royaltyAmount)
-  {
-    RoyaltyInfo memory royalties = _royalties[tokenId];
-    receiver = royalties.receiver;
-    royaltyAmount = (value * royalties.royaltyFraction) / 10000;
-  }
+  // function royaltyInfo(uint256 tokenId, uint256 value)
+  //   public
+  //   view
+  //   override
+  //   returns (address receiver, uint256 royaltyAmount)
+  // {
+  //   RoyaltyInfo memory royalties = _royalties[tokenId];
+  //   receiver = royalties.receiver;
+  //   royaltyAmount = (value * royalties.royaltyFraction) / 10000;
+  // }
 
   function getMarketAddress() public view returns (address marketAddress) {
     return marketplaceAddress;
