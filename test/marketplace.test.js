@@ -76,6 +76,7 @@ describe('Marketplace', () => {
       itemId = receipt.events[0].args.itemId
 
       await nft.connect(seller).setApprovalForAll(marketplace.address, true)
+      await nft.connect(seller).setTokenRoyalty(tokenId, royaltyAmount)
     })
 
     it('transfers token to buyer', async () => {

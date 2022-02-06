@@ -101,7 +101,10 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
     require(isForSale == true, 'Item requested is not for sale.');
     require(msg.value == salePrice, 'Please send the correct amount of ether.');
 
-    (address royaltyReceiver, uint256 royaltyAmount) = ERC2981(nftAddress).royaltyInfo(_tokenId, salePrice);
+    (address royaltyReceiver, uint256 royaltyAmount) = ERC2981(nftAddress).royaltyInfo(
+      _tokenId,
+      salePrice
+    );
 
     uint256 feeToMarketplace = ((marketplaceFee * msg.value) / 10000);
     uint256 etherToSeller = msg.value - feeToMarketplace - royaltyAmount;
