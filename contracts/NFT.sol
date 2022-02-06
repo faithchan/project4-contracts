@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import '@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/utils/Counters.sol';
+import '@openzeppelin/contracts/utils/math/SafeCast.sol';
 import './ERC2981.sol';
 import './Whitelist.sol';
 import 'hardhat/console.sol';
@@ -15,6 +16,9 @@ contract NFT is ERC721URIStorage, Ownable, ERC2981, Whitelist {
   /// @notice _tokenIds to keep track of the number of NFTs minted
   using Counters for Counters.Counter;
   Counters.Counter private _tokenIds;
+
+  /// @notice for converting royalty values from uint256 to uint96
+  using SafeCast for uint256;
 
   /// @notice address of marketplace contract to set permissions
   address private marketplaceAddress;
@@ -36,7 +40,13 @@ contract NFT is ERC721URIStorage, Ownable, ERC2981, Whitelist {
   }
 
   /// @inheritdoc	ERC165
-  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, ERC2981) returns (bool) {
+  function supportsInterface(bytes4 interfaceId)
+    public
+    view
+    virtual
+    override(ERC721, ERC2981)
+    returns (bool)
+  {
     return super.supportsInterface(interfaceId);
   }
 
@@ -55,12 +65,7 @@ contract NFT is ERC721URIStorage, Ownable, ERC2981, Whitelist {
     }
   }
 
-  function mint(
-    address to,
-    string memory tokenURI,
-    address royaltyRecipient,
-    uint256 royaltyValue
-  ) public returns (uint256 _tokenId) {
+  function mint(address to, string memory tokenURI) public returns (uint256 _tokenId) {
     require(isWhitelisted(msg.sender), 'Must be whitelisted to create tokens');
 
     uint256 currentTokenId = _tokenIds.current();
@@ -68,10 +73,6 @@ contract NFT is ERC721URIStorage, Ownable, ERC2981, Whitelist {
     _safeMint(to, currentTokenId);
     _setTokenURI(currentTokenId, tokenURI);
     tokenCreators[currentTokenId] = msg.sender;
-
-    if (royaltyValue > 0) {
-      _setTokenRoyalty(currentTokenId, royaltyRecipient, royaltyValue);
-    }
 
     _tokenIds.increment();
     return _tokenId;
@@ -108,18 +109,27 @@ contract NFT is ERC721URIStorage, Ownable, ERC2981, Whitelist {
   /// @param tokenId the token id fir which we register the royalties
   /// @param recipient recipient of the royalties
   /// @param value percentage (using 2 decimals - 10000 = 100, 0 = 0)
-  function _setTokenRoyalty(
+  function setTokenRoyalty(
     uint256 tokenId,
     address recipient,
     uint256 value
-  ) internal {
-    require(value <= 10000, 'ERC2981Royalties: Too high');
-
-    _royalties[tokenId] = RoyaltyInfo(recipient, uint24(value));
+  ) public onlyTokenOwner(tokenId) onlyTokenCreator(tokenId) {
+    if (value > 0) {
+      uint96 royaltyValue = toUint96(value);
+      _setTokenRoyalty(tokenId, recipient, royaltyValue);
+    }
   }
 
-  function updateTokenRoyalty(uint256 _tokenId, uint256 royaltyValue) public onlyTokenCreator(_tokenId) {
-    _setTokenRoyalty(_tokenId, msg.sender, royaltyValue);
+  function updateTokenRoyalty(uint256 tokenId, uint256 value) public onlyTokenCreator(tokenId) {
+    if (value > 0) {
+      uint96 royaltyValue = toUint96(value);
+      _setTokenRoyalty(tokenId, msg.sender, royaltyValue);
+    }
+  }
+
+  // ----------------------- Pure Functions --------------------------- //
+  function toUint96(uint256 a) public pure returns (uint96) {
+    return a.toUint96();
   }
 
   // ----------------------- Read Functions --------------------------- //
