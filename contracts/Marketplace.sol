@@ -134,6 +134,16 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard, ERC2981 {
     marketplaceFee = newFee;
   }
 
+  function updateTokenRoyalty(uint256 _tokenId, uint256 royaltyValue)
+    public
+  // onlyItemOwner(_itemId)
+  {
+    if (royaltyValue > 0) {
+      uint96 value = toUint96(royaltyValue);
+      _setTokenRoyalty(_tokenId, msg.sender, value);
+    }
+  }
+
   /**
     @notice Allows the owner of the NFT to delist their item
     @dev Requires the caller to be the owner of the item 

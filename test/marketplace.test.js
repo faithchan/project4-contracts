@@ -7,6 +7,7 @@ describe('Marketplace', () => {
   let nft
   let marketplaceFee = ethers.BigNumber.from(250)
   let royaltyAmount = ethers.BigNumber.from(500)
+  let newRoyaltyAmount = ethers.BigNumber.from(750)
   let salePrice = ethers.BigNumber.from(ethers.utils.parseEther('10'))
   const provider = ethers.provider
   const token1URI = 'https://ipfs.io/ipfs/QmXmNSH2dyp5R6dkW5MVhNc7xqV9v3NHWxNXJfCL6CcYxS'
@@ -56,6 +57,46 @@ describe('Marketplace', () => {
       await expectRevert(
         marketplace.listItem(nft.address, tokenId, salePrice, royaltyAmount),
         'Caller does not own token'
+      )
+    })
+  })
+
+  describe('Royalties', async () => {
+    let tokenId
+    beforeEach(async () => {
+      await nft.addToWhitelist(seller.address)
+      const token = await nft.connect(seller).mint(seller.address, token1URI)
+      const txn = await token.wait()
+      tokenId = txn.events[0].args.tokenId
+      await marketplace.connect(seller).listItem(nft.address, tokenId, salePrice, royaltyAmount)
+    })
+
+    it('sets royalty for specific token upon mint', async () => {
+      const txn = await marketplace.royaltyInfo(tokenId, salePrice)
+      console.log('txn: ', txn)
+      const expectedRoyalty = royaltyAmount.mul(salePrice).div(10000)
+      expect(txn[0]).to.equal(seller.address)
+      expect(txn[1]).to.equal(expectedRoyalty)
+    })
+
+    it('allows creator to update token royalties', async () => {
+      await marketplace.connect(seller).updateTokenRoyalty(tokenId, newRoyaltyAmount)
+      const expectedRoyalty = newRoyaltyAmount.mul(salePrice).div(10000)
+      const info = await marketplace.royaltyInfo(tokenId, salePrice)
+      expect(info[1]).to.equal(expectedRoyalty)
+    })
+
+    it('reverts if anyone other than the creator tries to change token royalties', async () => {
+      await expectRevert(
+        marketplace.updateTokenRoyalty(tokenId, newRoyaltyAmount),
+        'Caller is not the creator'
+      )
+    })
+
+    it('reverts if royalty amount is >10000', async () => {
+      await expectRevert(
+        marketplace.connect(seller).updateTokenRoyalty(tokenId, 10001),
+        'ERC2981: royalty fee will exceed salePrice'
       )
     })
   })

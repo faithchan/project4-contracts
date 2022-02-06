@@ -105,16 +105,6 @@ contract NFT is ERC721URIStorage, Ownable, ERC2981, Whitelist {
     transferFrom(from, to, tokenId);
   }
 
-  function updateTokenRoyalty(uint256 _tokenId, uint256 royaltyValue)
-    public
-    onlyTokenCreator(_tokenId)
-  {
-    if (royaltyValue > 0) {
-      uint96 value = toUint96(royaltyValue);
-      _setTokenRoyalty(_tokenId, msg.sender, value);
-    }
-  }
-
   function toUint96(uint256 a) public pure returns (uint96) {
     return a.toUint96();
   }

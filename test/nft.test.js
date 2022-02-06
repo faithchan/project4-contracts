@@ -153,46 +153,6 @@ describe('NFT', () => {
     })
   })
 
-  // describe('Royalties', async () => {
-  //   let tokenId
-  //   beforeEach(async () => {
-  //     await nft.addToWhitelist(minter.address)
-  //     const token = await nft
-  //       .connect(minter)
-  //       .mint(minter.address, token1URI, minter.address, royaltyAmount)
-  //     const txn = await token.wait()
-  //     tokenId = txn.events[0].args.tokenId
-  //   })
-
-  //   it('sets royalty for specific token upon mint', async () => {
-  //     const txn = await nft.royaltyInfo(tokenId, salePrice)
-  //     const expectedRoyalty = royaltyAmount.mul(salePrice).div(10000)
-  //     expect(txn.receiver).to.equal(minter.address)
-  //     expect(txn.royaltyAmount).to.equal(expectedRoyalty)
-  //   })
-
-  //   it('allows creator to update token royalties', async () => {
-  //     await nft.connect(minter).updateTokenRoyalty(tokenId, newRoyaltyAmount)
-  //     const expectedRoyalty = newRoyaltyAmount.mul(salePrice).div(10000)
-  //     const info = await nft.royaltyInfo(tokenId, salePrice)
-  //     expect(info.royaltyAmount).to.equal(expectedRoyalty)
-  //   })
-
-  //   it('reverts if anyone other than the creator tries to change token royalties', async () => {
-  //     await expectRevert(
-  //       nft.updateTokenRoyalty(tokenId, newRoyaltyAmount),
-  //       'Caller is not the creator'
-  //     )
-  //   })
-
-  //   it('reverts if royalty amount is >10000', async () => {
-  //     await expectRevert(
-  //       nft.connect(minter).updateTokenRoyalty(tokenId, 10001),
-  //       'ERC2981Royalties: Too high'
-  //     )
-  //   })
-  // })
-
   describe('Whitelisting', async () => {
     it('allows contract owner to initialise whitelist addresses', async () => {
       await nft.initWhitelist([whitelistAdd1.address, whitelistAdd2.address])
