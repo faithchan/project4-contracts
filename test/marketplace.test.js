@@ -208,7 +208,24 @@ describe('Marketplace', () => {
   })
 
   describe('Querying marketplace items', () => {
-    it('fetches item details using itemId ', async () => {})
+    let tokenId1
+    let itemId
+    beforeEach(async () => {
+      await nft.addToWhitelist(seller.address)
+      const token = await nft.connect(seller).mint(seller.address, token1URI)
+      let txn = await token.wait()
+      tokenId1 = txn.events[0].args.tokenId
+
+      txn = await marketplace.connect(seller).listItem(nft.address, tokenId1, salePrice)
+      const receipt = await txn.wait()
+      itemId = receipt.events[0].args.itemId
+    })
+
+    it('fetches item details using itemId ', async () => {
+      const item = await marketplace.getItemById(itemId)
+      // console.log('item: ', item)
+    })
+
     it('fetches all owned items ', async () => {})
     it('fetches all listed items', async () => {})
   })

@@ -104,8 +104,8 @@ describe('NFT', () => {
   describe('Burning', async () => {
     let tokenId
     beforeEach(async () => {
-      await nft.addToWhitelist(contractOwner.address)
-      const token = await nft.mint(minter.address, token1URI)
+      await nft.addToWhitelist(minter.address)
+      const token = await nft.connect(minter).mint(minter.address, token1URI)
       const txn = await token.wait()
       tokenId = txn.events[0].args.tokenId
     })
@@ -171,7 +171,7 @@ describe('NFT', () => {
     })
 
     it('allows creator to update token royalties', async () => {
-      await nft.connect(minter).updateTokenRoyalty(tokenId, newRoyaltyAmount)
+      await nft.connect(minter).setTokenRoyalty(tokenId, newRoyaltyAmount)
       const expectedRoyalty = newRoyaltyAmount.mul(salePrice).div(10000)
       const txn = await nft.royaltyInfo(tokenId, salePrice)
       expect(txn[1]).to.equal(expectedRoyalty)
@@ -183,14 +183,14 @@ describe('NFT', () => {
 
     it('reverts if anyone other than the creator tries to change token royalties', async () => {
       await expectRevert(
-        nft.updateTokenRoyalty(tokenId, newRoyaltyAmount),
+        nft.setTokenRoyalty(tokenId, newRoyaltyAmount),
         'Caller is not the creator'
       )
     })
 
     it('reverts if royalty amount is >10000', async () => {
       await expectRevert(
-        nft.connect(minter).updateTokenRoyalty(tokenId, 10001),
+        nft.connect(minter).setTokenRoyalty(tokenId, 10001),
         'ERC2981: royalty fee will exceed salePrice'
       )
     })
