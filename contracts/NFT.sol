@@ -2,6 +2,8 @@
 pragma solidity ^0.8.0;
 
 import '@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol';
+// import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
+// import '@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/utils/Counters.sol';
 import '@openzeppelin/contracts/utils/math/SafeCast.sol';
@@ -35,6 +37,9 @@ contract NFT is ERC721URIStorage, Ownable, ERC2981, Whitelist {
   /// @notice Maps tokenId to royalty information
   mapping(uint256 => RoyaltyInfo) internal _royalties;
 
+  // Array with all token ids, used for enumeration
+  uint256[] private _allTokens;
+
   constructor(address _marketplaceAddress) ERC721('Arkiv', 'ARKV') {
     marketplaceAddress = _marketplaceAddress;
   }
@@ -61,6 +66,7 @@ contract NFT is ERC721URIStorage, Ownable, ERC2981, Whitelist {
     _setTokenURI(currentTokenId, tokenURI);
     tokenCreators[currentTokenId] = msg.sender;
 
+    _allTokens.push(currentTokenId);
     _tokenIds.increment();
     return currentTokenId;
   }
@@ -137,6 +143,10 @@ contract NFT is ERC721URIStorage, Ownable, ERC2981, Whitelist {
 
   function getMarketAddress() public view returns (address marketAddress) {
     return marketplaceAddress;
+  }
+
+  function totalSupply() public view virtual returns (uint256) {
+    return _allTokens.length;
   }
 
   // ----------------------- Modifiers --------------------------- //
