@@ -234,20 +234,23 @@ describe('Marketplace', () => {
     it('fetches item details using itemId ', async () => {
       const item1 = await marketplace.getItemById(itemId1)
       const item2 = await marketplace.getItemById(itemId2)
-      // console.log('item1: ', item1)
-      // console.log('item2: ', item2)
       expect(item1.tokenId).to.equal(tokenId1)
       expect(item2.tokenId).to.equal(tokenId2)
     })
 
     it('fetches all owned items ', async () => {
       const items = await marketplace.connect(seller).getItemsOwned()
-      console.log('owned items: ', items)
+      expect(items.length).to.equal(2)
+      expect(items[0].owner).to.equal(seller.address)
+      expect(items[1].owner).to.equal(seller.address)
     })
 
     it('fetches all listed items', async () => {
-      const items = await marketplace.connect(seller).getListedItems()
-      console.log('listed items: ', items)
+      let items = await marketplace.connect(seller).getListedItems()
+      expect(items.length).to.equal(2)
+      await marketplace.connect(seller).delistItem(itemId1)
+      items = await marketplace.connect(seller).getListedItems()
+      expect(items.length).to.equal(1)
     })
   })
 })
