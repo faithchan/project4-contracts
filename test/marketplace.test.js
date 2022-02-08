@@ -209,21 +209,33 @@ describe('Marketplace', () => {
 
   describe('Querying marketplace items', () => {
     let tokenId1
-    let itemId
+    let tokenId2
+    let itemId1
+    let itemId2
     beforeEach(async () => {
       await nft.addToWhitelist(seller.address)
-      const token = await nft.connect(seller).mint(seller.address, token1URI)
+      let token = await nft.connect(seller).mint(seller.address, token1URI)
       let txn = await token.wait()
       tokenId1 = txn.events[0].args.tokenId
 
+      token = await nft.connect(seller).mint(seller.address, token1URI)
+      txn = await token.wait()
+      tokenId2 = txn.events[0].args.tokenId
+
       txn = await marketplace.connect(seller).listItem(nft.address, tokenId1, salePrice)
-      const receipt = await txn.wait()
-      itemId = receipt.events[0].args.itemId
+      let receipt = await txn.wait()
+      itemId1 = receipt.events[0].args.itemId
+
+      txn = await marketplace.connect(seller).listItem(nft.address, tokenId2, salePrice)
+      receipt = await txn.wait()
+      itemId2 = receipt.events[0].args.itemId
     })
 
     it('fetches item details using itemId ', async () => {
-      const item = await marketplace.getItemById(itemId)
-      // console.log('item: ', item)
+      const item1 = await marketplace.getItemById(itemId1)
+      const item2 = await marketplace.getItemById(itemId2)
+      expect(item1.tokenId).to.equal(tokenId1)
+      expect(item2.tokenId).to.equal(tokenId2)
     })
 
     it('fetches all owned items ', async () => {})
