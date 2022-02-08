@@ -110,13 +110,18 @@ describe('NFT', () => {
       tokenId = txn.events[0].args.tokenId
     })
 
-    it('only allows token owner to burn tokens', async () => {
+    it('only allows token owner & creator to burn tokens', async () => {
       await nft.connect(minter).burn(tokenId)
       expect(await nft.balanceOf(minter.address)).to.equal(0)
     })
 
     it('reverts if caller is not token owner', async () => {
       await expectRevert(nft.burn(tokenId), 'Caller is not the owner')
+    })
+
+    it('reverts if caller is not token creator', async () => {
+      await nft.connect(minter).transferToken(minter.address, receiver.address, tokenId)
+      await expectRevert(nft.connect(receiver).burn(tokenId), 'Caller is not the creator')
     })
   })
 
