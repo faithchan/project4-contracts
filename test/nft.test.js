@@ -254,4 +254,18 @@ describe('NFT', () => {
       )
     })
   })
+
+  describe('Reading Contract', () => {
+    let tokenId
+    beforeEach(async () => {
+      await nft.addToWhitelist(minter.address)
+      const token = await nft.connect(minter).mint(minter.address, token1URI)
+      const txn = await token.wait()
+      tokenId = txn.events[0].args.tokenId
+    })
+    it('returns tokens owned by address', async () => {
+      const owner = await nft.ownerOf(tokenId)
+      console.log('owner: ', owner)
+    })
+  })
 })
