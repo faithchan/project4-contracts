@@ -147,8 +147,27 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
 
   // ------------------ Read Functions ---------------------- //
 
-  function getItemById(uint256 _itemId) public view returns (Item memory) {
-    return MarketItems[_itemId];
+  function getItemsOwned() public view returns (Item[] memory) {
+    uint256 totalItemCount = _itemIds.current();
+    uint256 myItemsCount = 0;
+    uint256 resultItemId = 0;
+
+    for (uint256 i = 0; i < totalItemCount; i++) {
+      if (MarketItems[i].owner == msg.sender) {
+        myItemsCount++;
+      }
+    }
+
+    Item[] memory ownedItems = new Item[](myItemsCount);
+    for (uint256 i = 0; i < totalItemCount; i++) {
+      if (MarketItems[i].owner == msg.sender) {
+        uint256 thisItemId = MarketItems[i].itemId;
+        Item storage thisItem = MarketItems[thisItemId];
+        ownedItems[resultItemId] = thisItem;
+        resultItemId++;
+      }
+    }
+    return ownedItems;
   }
 
   function getListedItems() public view returns (Item[] memory) {
@@ -157,15 +176,15 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
     uint256 resultItemId = 0;
 
     for (uint256 i = 0; i < totalItemCount; i++) {
-      if (MarketItems[i + 1].isListed == true) {
+      if (MarketItems[i].isListed == true) {
         itemsListedCount++;
       }
     }
 
     Item[] memory listedItems = new Item[](itemsListedCount);
     for (uint256 i = 0; i < totalItemCount; i++) {
-      if (MarketItems[i + 1].isListed == true) {
-        uint256 thisItemId = MarketItems[i + 1].itemId;
+      if (MarketItems[i].isListed == true) {
+        uint256 thisItemId = MarketItems[i].itemId;
         Item storage thisItem = MarketItems[thisItemId];
         listedItems[resultItemId] = thisItem;
         resultItemId++;
@@ -174,27 +193,8 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
     return listedItems;
   }
 
-  function getItemsOwned() public view returns (Item[] memory) {
-    uint256 totalItemCount = _itemIds.current();
-    uint256 myItemsCount = 0;
-    uint256 resultItemId = 0;
-
-    for (uint256 i = 0; i < totalItemCount; i++) {
-      if (MarketItems[i + 1].owner == msg.sender) {
-        myItemsCount++;
-      }
-    }
-
-    Item[] memory ownedItems = new Item[](myItemsCount);
-    for (uint256 i = 0; i < totalItemCount; i++) {
-      if (MarketItems[i + 1].owner == msg.sender) {
-        uint256 thisItemId = MarketItems[i + 1].itemId;
-        Item storage thisItem = MarketItems[thisItemId];
-        ownedItems[resultItemId] = thisItem;
-        resultItemId++;
-      }
-    }
-    return ownedItems;
+  function getItemById(uint256 _itemId) public view returns (Item memory) {
+    return MarketItems[_itemId];
   }
 
   // ------------------ Modifiers ---------------------- //

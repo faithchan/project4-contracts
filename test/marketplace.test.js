@@ -234,11 +234,20 @@ describe('Marketplace', () => {
     it('fetches item details using itemId ', async () => {
       const item1 = await marketplace.getItemById(itemId1)
       const item2 = await marketplace.getItemById(itemId2)
+      // console.log('item1: ', item1)
+      // console.log('item2: ', item2)
       expect(item1.tokenId).to.equal(tokenId1)
       expect(item2.tokenId).to.equal(tokenId2)
     })
 
-    it('fetches all owned items ', async () => {})
-    it('fetches all listed items', async () => {})
+    it('fetches all owned items ', async () => {
+      const items = await marketplace.connect(seller).getItemsOwned()
+      console.log('owned items: ', items)
+    })
+
+    it('fetches all listed items', async () => {
+      const items = await marketplace.connect(seller).getListedItems()
+      console.log('listed items: ', items)
+    })
   })
 })
