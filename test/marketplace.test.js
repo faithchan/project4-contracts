@@ -206,4 +206,10 @@ describe('Marketplace', () => {
       )
     })
   })
+
+  describe('Querying marketplace items', () => {
+    it('fetches item details using itemId ', async () => {})
+    it('fetches all owned items ', async () => {})
+    it('fetches all listed items', async () => {})
+  })
 })

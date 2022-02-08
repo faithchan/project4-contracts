@@ -52,19 +52,6 @@ contract NFT is ERC721URIStorage, Ownable, ERC2981, Whitelist {
 
   // ------------------ Mutative Functions ---------------------- //
 
-  /**
-   * @dev Whitelists a bunch of addresses.
-   * @param _whitelistees address[] of addresses to whitelist.
-   */
-  function initWhitelist(address[] memory _whitelistees) public onlyOwner {
-    for (uint256 i = 0; i < _whitelistees.length; i++) {
-      address creator = _whitelistees[i];
-      if (!isWhitelisted(creator)) {
-        _whitelist(creator);
-      }
-    }
-  }
-
   function mint(address to, string memory tokenURI) public returns (uint256 _tokenId) {
     require(isWhitelisted(msg.sender), 'Must be whitelisted to create tokens');
 
@@ -75,10 +62,10 @@ contract NFT is ERC721URIStorage, Ownable, ERC2981, Whitelist {
     tokenCreators[currentTokenId] = msg.sender;
 
     _tokenIds.increment();
-    return _tokenId;
+    return currentTokenId;
   }
 
-  function burn(uint256 _tokenId) public onlyTokenOwner(_tokenId) {
+  function burn(uint256 _tokenId) public onlyTokenOwner(_tokenId) onlyTokenCreator(_tokenId) {
     _burn(_tokenId);
   }
 
@@ -108,17 +95,27 @@ contract NFT is ERC721URIStorage, Ownable, ERC2981, Whitelist {
   /// @dev Sets token royalties
   /// @param tokenId the token id fir which we register the royalties
   /// @param value percentage (using 2 decimals - 10000 = 100, 0 = 0)
-  function setTokenRoyalty(uint256 tokenId, uint256 value) public onlyTokenCreator(tokenId) {
+  function setTokenRoyalty(uint256 tokenId, uint256 value)
+    public
+    onlyTokenCreator(tokenId)
+    onlyTokenOwner(tokenId)
+  {
     if (value > 0) {
       uint96 royaltyValue = toUint96(value);
       _setTokenRoyalty(tokenId, msg.sender, royaltyValue);
     }
   }
 
-  function updateTokenRoyalty(uint256 tokenId, uint256 value) public onlyTokenCreator(tokenId) {
-    if (value > 0) {
-      uint96 royaltyValue = toUint96(value);
-      _setTokenRoyalty(tokenId, msg.sender, royaltyValue);
+  /**
+   * @dev Whitelists a bunch of addresses.
+   * @param _whitelistees address[] of addresses to whitelist.
+   */
+  function initWhitelist(address[] memory _whitelistees) public onlyOwner {
+    for (uint256 i = 0; i < _whitelistees.length; i++) {
+      address creator = _whitelistees[i];
+      if (!isWhitelisted(creator)) {
+        _whitelist(creator);
+      }
     }
   }
 
