@@ -56,7 +56,9 @@ contract NFT is ERC721URIStorage, Ownable, ERC2981, Whitelist {
   // ------------------ Mutative Functions ---------------------- //
 
   function mint(address to, string memory tokenURI) public returns (uint256 _tokenId) {
+    bytes memory uri = bytes(tokenURI);
     require(isWhitelisted(msg.sender), 'Must be whitelisted to create tokens');
+    require(uri.length != 0, 'ERC721: tokenURI is empty');
 
     uint256 currentTokenId = _tokenIds.current();
 

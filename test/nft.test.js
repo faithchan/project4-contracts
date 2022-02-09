@@ -69,6 +69,14 @@ describe('NFT', () => {
       await nft.addToWhitelist(contractOwner.address)
       await expectRevert(nft.mint(ZERO_ADDRESS, token1URI), 'ERC721: mint to the zero address')
     })
+
+    it('reverts if tokenURI is an empty string', async () => {
+      const emptyURI = ''
+      await expectRevert(
+        nft.connect(minter).mint(minter.address, emptyURI),
+        'ERC721: tokenURI is empty'
+      )
+    })
   })
 
   describe('Transfers', async () => {

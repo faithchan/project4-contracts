@@ -21,7 +21,7 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
     @notice Royalties charged by the marketplace 
     @dev Value set in constructor 
  */
-  uint256 public marketplaceFee;
+  uint256 public protocolFee;
 
   /// @notice maps itemId to Item struct
   mapping(uint256 => Item) private MarketItems;
@@ -56,7 +56,7 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
  */
   constructor(uint256 fee) {
     marketplaceOwner = payable(msg.sender);
-    marketplaceFee = fee;
+    protocolFee = fee;
   }
 
   // ------------------ Mutative Functions ---------------------- //
@@ -106,7 +106,7 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
       salePrice
     );
 
-    uint256 feeToMarketplace = ((marketplaceFee * msg.value) / 10000);
+    uint256 feeToMarketplace = ((protocolFee * msg.value) / 10000);
     uint256 etherToSeller = msg.value - feeToMarketplace - royaltyAmount;
 
     IERC721(nftAddress).transferFrom(owner, msg.sender, _tokenId);
@@ -125,8 +125,8 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
     }
   }
 
-  function updateMarketplaceFee(uint256 newFee) public onlyOwner {
-    marketplaceFee = newFee;
+  function updateProtocolFee(uint256 newFee) public onlyOwner {
+    protocolFee = newFee;
   }
 
   /**
