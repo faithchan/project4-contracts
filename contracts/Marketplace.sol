@@ -140,7 +140,6 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
   }
 
   function transferEther(address receiver, uint256 amount) internal {
-    // console.log('transfering', amount, 'to: ', receiver);
     (bool transferSuccess, ) = payable(receiver).call{ value: amount }('');
     require(transferSuccess, 'Failed to transfer royalties to marketplace.');
   }

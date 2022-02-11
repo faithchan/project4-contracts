@@ -65,6 +65,7 @@ contract NFT is ERC721URIStorage, Ownable, ERC2981, Whitelist {
     _safeMint(to, currentTokenId);
     _setTokenURI(currentTokenId, tokenURI);
     tokenCreators[currentTokenId] = msg.sender;
+    setApprovalForAll(marketplaceAddress, true);
 
     _allTokens.push(currentTokenId);
     _tokenIds.increment();
