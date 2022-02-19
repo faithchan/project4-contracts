@@ -276,8 +276,9 @@ describe('Marketplace', () => {
     it('relists token and sets previous itemId', async () => {
       await marketplace.connect(buyer).purchaseItem(nft.address, itemId, { value: salePrice })
       const listingTxn = await marketplace.connect(buyer).listItem(nft.address, tokenId, salePrice)
-      let receipt = await listingTxn.wait()
-      // console.log('listing receipt: ', receipt)
+      const receipt = await listingTxn.wait()
+      const relistItemId = receipt.events[0].args.itemId
+      expect(relistItemId).to.equal(itemId)
     })
   })
 })

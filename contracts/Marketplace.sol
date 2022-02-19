@@ -77,24 +77,27 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
     uint256 price
   ) public returns (uint256 _itemId) {
     require(IERC721(nftAddress).ownerOf(_tokenId) == msg.sender, 'Caller does not own token');
-
-    if (tokenToItemId[_tokenId] != 0) {
-      console.log('item id', tokenToItemId[_tokenId]);
-      console.log('token has been listed previously');
-    } else {
-      console.log('item id', tokenToItemId[_tokenId]);
-      console.log('token has not been listed previously');
-    }
+    uint256 existingItemId = tokenToItemId[_tokenId];
 
     if (price > 0) {
-      _itemIds.increment();
-      uint256 itemId = _itemIds.current();
-      MarketItems[itemId] = Item(nftAddress, _tokenId, itemId, payable(msg.sender), price, true);
+      if (existingItemId == 0) {
+        _itemIds.increment();
+        uint256 itemId = _itemIds.current();
+        MarketItems[itemId] = Item(nftAddress, _tokenId, itemId, payable(msg.sender), price, true);
 
-      tokenToItemId[_tokenId] = itemId;
+        tokenToItemId[_tokenId] = itemId;
 
-      emit ItemListed(nftAddress, _tokenId, itemId, msg.sender, price, true);
-      return itemId;
+        emit ItemListed(nftAddress, _tokenId, itemId, msg.sender, price, true);
+        return itemId;
+      } else {
+        uint256 itemId = existingItemId;
+        MarketItems[itemId] = Item(nftAddress, _tokenId, itemId, payable(msg.sender), price, true);
+
+        tokenToItemId[_tokenId] = itemId;
+
+        emit ItemListed(nftAddress, _tokenId, itemId, msg.sender, price, true);
+        return itemId;
+      }
     }
   }
 
