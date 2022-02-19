@@ -10,4 +10,4 @@ Deployed Contract Address on Rinkeby:
 ## Marketplace Contract
 
 Deployed Contract Address on Rinkeby:
-0xF5969a3F6C64544cf1D0F596507a36De1aDEC83B
+0xaB143f6dc9fA5c694c88F65935680Eb3f22B0AC3
