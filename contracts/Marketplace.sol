@@ -26,6 +26,9 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
   /// @notice maps itemId to Item struct
   mapping(uint256 => Item) private MarketItems;
 
+  /// @notice maps tokenId to itemId
+  mapping(uint256 => uint256) private tokenToItemId;
+
   /// @notice Item struct to track details of items listed on the marketplace
   struct Item {
     address nftAddress;
