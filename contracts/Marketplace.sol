@@ -152,6 +152,8 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
   */
   function delistItem(uint256 _itemId) public onlyItemOwner(_itemId) {
     require(MarketItems[_itemId].isListed == true, 'Item is not listed.');
+    uint256 tokenId = MarketItems[_itemId].tokenId;
+    delete tokenToItemId[tokenId];
     MarketItems[_itemId].isListed = false;
   }
 

@@ -150,10 +150,16 @@ describe('Marketplace', () => {
       itemId = receipt.events[0].args.itemId
     })
 
-    it('successfully delists listed item', async () => {
+    it('sets item listed status to false', async () => {
       await marketplace.connect(seller).delistItem(itemId)
       const item = await marketplace.getItemById(itemId)
       expect(item['isListed']).to.equal(false)
+    })
+
+    it('sets itemId in tokenId mapping to zero', async () => {
+      await marketplace.connect(seller).delistItem(itemId)
+      const newItemId = await marketplace.getItemId(tokenId)
+      expect(newItemId).to.equal(0)
     })
 
     it('reverts if caller is not the owner of item', async () => {
@@ -252,6 +258,13 @@ describe('Marketplace', () => {
       items = await marketplace.connect(seller).getListedItems()
       expect(items.length).to.equal(1)
     })
+
+    it('fetches itemId using tokenId ', async () => {
+      const listedItemId1 = await marketplace.getItemId(tokenId1)
+      const listedItemId2 = await marketplace.getItemId(tokenId2)
+      expect(listedItemId1).to.equal(itemId1)
+      expect(listedItemId2).to.equal(itemId2)
+    })
   })
 
   describe('relisting', () => {
@@ -266,11 +279,6 @@ describe('Marketplace', () => {
       txn = await marketplace.connect(seller).listItem(nft.address, tokenId, salePrice)
       let receipt = await txn.wait()
       itemId = receipt.events[0].args.itemId
-    })
-
-    it('fetches itemId using tokenId ', async () => {
-      const listedItemId = await marketplace.getItemId(tokenId)
-      expect(listedItemId).to.equal(itemId)
     })
 
     it('relists token and sets previous itemId', async () => {
