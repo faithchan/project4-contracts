@@ -253,4 +253,24 @@ describe('Marketplace', () => {
       expect(items.length).to.equal(1)
     })
   })
+
+  describe('mapping tokenId to itemId', () => {
+    let tokenId
+    let itemId
+    beforeEach(async () => {
+      await nft.addToWhitelist(seller.address)
+      let token = await nft.connect(seller).mint(seller.address, token1URI)
+      let txn = await token.wait()
+      tokenId = txn.events[0].args.tokenId
+
+      txn = await marketplace.connect(seller).listItem(nft.address, tokenId, salePrice)
+      let receipt = await txn.wait()
+      itemId = receipt.events[0].args.itemId
+    })
+
+    it('fetches itemId using tokenId ', async () => {
+      const listedItemId = await marketplace.getItemId(tokenId)
+      expect(listedItemId).to.equal(itemId)
+    })
+  })
 })

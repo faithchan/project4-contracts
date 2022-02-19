@@ -83,6 +83,8 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
       MarketItems[itemId] = Item(nftAddress, _tokenId, itemId, payable(msg.sender), price, true);
       _itemIds.increment();
 
+      tokenToItemId[_tokenId] = itemId;
+
       emit ItemListed(nftAddress, _tokenId, itemId, msg.sender, price, true);
       return itemId;
     }
