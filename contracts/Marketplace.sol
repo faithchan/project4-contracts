@@ -149,6 +149,10 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
 
   // ------------------ Read Functions ---------------------- //
 
+  function getItemId(uint256 tokenId) public view returns (uint256 itemId) {
+    return tokenToItemId[tokenId];
+  }
+
   function getItemsOwned() public view returns (Item[] memory) {
     uint256 totalItemCount = _itemIds.current();
     uint256 myItemsCount = 0;
