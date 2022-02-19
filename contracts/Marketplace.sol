@@ -171,14 +171,14 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
     uint256 myItemsCount = 0;
     uint256 resultItemId = 0;
 
-    for (uint256 i = 0; i < totalItemCount; i++) {
+    for (uint256 i = 1; i <= totalItemCount; i++) {
       if (MarketItems[i].owner == msg.sender) {
         myItemsCount++;
       }
     }
 
     Item[] memory ownedItems = new Item[](myItemsCount);
-    for (uint256 i = 0; i < totalItemCount; i++) {
+    for (uint256 i = 1; i <= totalItemCount; i++) {
       if (MarketItems[i].owner == msg.sender) {
         uint256 thisItemId = MarketItems[i].itemId;
         Item storage thisItem = MarketItems[thisItemId];
@@ -194,14 +194,14 @@ contract Marketplace is ERC721Holder, Ownable, ReentrancyGuard {
     uint256 itemsListedCount = 0;
     uint256 resultItemId = 0;
 
-    for (uint256 i = 0; i < totalItemCount; i++) {
+    for (uint256 i = 1; i <= totalItemCount; i++) {
       if (MarketItems[i].isListed == true) {
         itemsListedCount++;
       }
     }
 
     Item[] memory listedItems = new Item[](itemsListedCount);
-    for (uint256 i = 0; i < totalItemCount; i++) {
+    for (uint256 i = 1; i <= totalItemCount; i++) {
       if (MarketItems[i].isListed == true) {
         uint256 thisItemId = MarketItems[i].itemId;
         Item storage thisItem = MarketItems[thisItemId];
